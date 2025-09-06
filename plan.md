@@ -120,13 +120,18 @@
 **Tests**: In-memory DB; status transitions; timestamps set; counts correct.
 **Commit**: `feat(data): T6 runs registry with metrics`
 
-#### T7 — DAG: daily_prices (orchestration only)
+#### T7 — DAG: daily_prices (orchestration only) ✅
 **Goal**: Compose adapter → normalizer → validator → loader with logging.
 **Spec**:
-- [ ] pipeline/dags/daily_prices.yml with {tickers, start, end} (default: last 365 calendar days)
+- [x] `DailyPricesConfig` with ticker, start_date, end_date (default: last 365 days)
+- [x] `run_daily_prices(config, conn) -> summary dict`
+- [x] `pipeline/run.py` CLI for human-visible execution
 **Function**:
-- [ ] `run_daily_prices(spec) -> summary dict`
-**Tests**: Integration using stubbed adapter + real normalizer/loader; assert row counts and runs row.
+- [x] Complete pipeline: fetch → normalize → validate → store → track
+- [x] Error handling with graceful failure and run tracking
+- [x] Metrics calculation (price ranges, returns, volume)
+- [x] Idempotent execution (safe to retry)
+**Tests**: Integration using mocked adapter + real normalizer/loader; assert row counts and runs row.
 **Commit**: `feat(data): T7 daily_prices DAG + integration test`
 
 #### T8 — DAG: quarterly_13f (orchestration only)

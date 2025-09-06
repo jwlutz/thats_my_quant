@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T7: Daily Prices DAG (First Human-Visible Product!)
+- Implemented complete daily_prices pipeline orchestration (fetch → normalize → validate → store)
+- Added DailyPricesConfig with smart defaults (365 days lookback)
+- Built comprehensive error handling with graceful failure and run tracking
+- Created CLI runner (python pipeline/run.py daily_prices AAPL) with rich output
+- Calculates price metrics (ranges, returns, volume) and stores in SQLite
+- All operations tested with mocked providers (10 test cases) - fully integrated
+
 #### T6: runs Registry & Metrics
 - Implemented complete run lifecycle tracking (start_run, finish_run, get_run_status)
 - Added run listing and filtering with list_recent_runs (by DAG, with limits)
