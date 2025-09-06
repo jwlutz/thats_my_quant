@@ -1,0 +1,35 @@
+{
+  "comment": "Raw 13F data as parsed from SEC filing - Berkshire sample",
+  "filing_date": "2023-11-14",
+  "report_period": "2023-09-30",
+  "data": [
+    {
+      "nameOfIssuer": "APPLE INC",
+      "cusip": "037833100",
+      "value": 174800000,
+      "shares": 915560382,
+      "shareType": "SH",
+      "putCall": null,
+      "investmentDiscretion": "SOLE",
+      "votingAuthoritySole": "915560382",
+      "votingAuthorityShared": "0",
+      "votingAuthorityNone": "0",
+      "Company Name": "BERKSHIRE HATHAWAY INC",
+      "CIK": "0001067983"
+    },
+    {
+      "nameOfIssuer": "BANK OF AMERICA CORP",
+      "cusip": "060505104",
+      "value": 28280000,
+      "shares": 1032852006,
+      "shareType": "SH",
+      "putCall": null,
+      "investmentDiscretion": "SOLE",
+      "votingAuthoritySole": "1032852006",
+      "votingAuthorityShared": "0",
+      "votingAuthorityNone": "0",
+      "Company Name": "BERKSHIRE HATHAWAY INC",
+      "CIK": "0001067983"
+    }
+  ]
+}

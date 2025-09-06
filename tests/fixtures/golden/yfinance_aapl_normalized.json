@@ -1,0 +1,31 @@
+{
+  "comment": "Expected normalized price data - canonical shape",
+  "data": [
+    {
+      "ticker": "AAPL",
+      "date": "2024-01-15",
+      "open": 185.25,
+      "high": 186.80,
+      "low": 184.50,
+      "close": 185.92,
+      "adj_close": 185.75,
+      "volume": 65284300,
+      "source": "yfinance",
+      "as_of": "2024-01-15",
+      "ingested_at": "2024-01-16T09:00:00"
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2024-01-16",
+      "open": 186.10,
+      "high": 187.45,
+      "low": 185.80,
+      "close": 187.11,
+      "adj_close": 186.94,
+      "volume": 58414500,
+      "source": "yfinance",
+      "as_of": "2024-01-16",
+      "ingested_at": "2024-01-16T09:00:00"
+    }
+  ]
+}

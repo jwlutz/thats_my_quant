@@ -1,0 +1,29 @@
+{
+  "comment": "Expected normalized 13F data - canonical shape",
+  "data": [
+    {
+      "cik": "0001067983",
+      "filer": "BERKSHIRE HATHAWAY INC",
+      "ticker": "AAPL",
+      "name": "APPLE INC",
+      "cusip": "037833100",
+      "value_usd": 174800000.0,
+      "shares": 915560382.0,
+      "as_of": "2023-09-30",
+      "source": "sec_edgar",
+      "ingested_at": "2024-01-16T10:00:00"
+    },
+    {
+      "cik": "0001067983",
+      "filer": "BERKSHIRE HATHAWAY INC",
+      "ticker": "BAC",
+      "name": "BANK OF AMERICA CORP",
+      "cusip": "060505104",
+      "value_usd": 28280000.0,
+      "shares": 1032852006.0,
+      "as_of": "2023-09-30",
+      "source": "sec_edgar",
+      "ingested_at": "2024-01-16T10:00:00"
+    }
+  ]
+}

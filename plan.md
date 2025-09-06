@@ -57,16 +57,24 @@
 **Tests**: unit + property tests; fail closed on missing/extra keys or invalid numerics.
 **Commit**: `feat(data): T1 validators for prices & 13F`
 
-#### T2 — Normalizers (pure; minimal normalization)
+#### T2 — Normalizers (pure; minimal normalization) ✅
 **Goal**: Transform provider-native rows → canonical shapes with ONLY necessary coercions.
 **Functions**:
-- [ ] `normalize_prices(raw_rows, *, ticker, source, as_of) -> list[canonical]`
-- [ ] `normalize_13f(raw_rows, *, source, as_of) -> list[canonical]`
+- [x] `normalize_prices(raw_rows, *, ticker, source, as_of) -> list[canonical]`
+- [x] `normalize_13f(raw_rows, *, source, as_of) -> list[canonical]`
 **Rules**:
-- [ ] Do not uppercase/trim if provider output is already normalized or schema accepts it
-- [ ] Only normalize when justified (comment + plan.md note)
+- [x] Do not uppercase/trim if provider output is already normalized or schema accepts it
+- [x] Only normalize when justified (comment + plan.md note)
 **Tests**: Golden fixtures (AAPL 2 days; tiny 13F snapshot). Exact canonical output; PK uniqueness.
 **Commit**: `feat(data): T2 normalizers with golden fixtures`
+
+**Normalizations Applied (Justified)**:
+- Date strings → date objects (schema requirement)
+- Field name mapping (provider uses "Date", "Open" vs canonical "date", "open")
+- CIK padding to 10 digits (SEC standard format)
+- 13F values: thousands → dollars (consistent units)
+- Primary key deduplication (prevents DB constraint violations)
+- Ticker inference from issuer name (enables price-holdings joins)
 
 #### T3 — Loader Idempotence (thin IO, SQLite)
 **Goal**: Idempotent upsert writers.

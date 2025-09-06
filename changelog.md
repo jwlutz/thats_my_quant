@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T2: Normalizers
+- Implemented normalize_prices and normalize_13f pure transformation functions
+- Created golden test fixtures for AAPL prices and Berkshire 13F data
+- Applied minimal normalization: date parsing, field mapping, CIK padding, value units
+- All normalizations justified and documented with rationale
+- Primary key deduplication prevents DB constraint violations
+
 #### T1: Core Validators
 - Implemented validate_prices_row and validate_13f_row pure functions
 - Added comprehensive validation for required keys, types, and numeric constraints
