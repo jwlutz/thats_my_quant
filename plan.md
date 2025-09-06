@@ -95,15 +95,17 @@
 **Tests**: Mock network; assert shape only. No live calls in CI.
 **Commit**: `feat(data): T4 yfinance adapter (mocked tests)`
 
-#### T5 — 13F Adapter Wrapper (over existing data_extraction.py)
+#### T5 — 13F Adapter Wrapper (over existing data_extraction.py) ✅
 **Goal**: Stable interface around our scraper; do not rewrite.
 **Function**:
-- [ ] `fetch_13f_quarter(ticker, *, quarter_end) -> list[raw_rows]`
+- [x] `fetch_13f_quarter(entity_name|cik, *, quarter_end) -> list[raw_rows]`
+- [x] Quarter-end date validation and filing deadline calculation
+- [x] Environment variable configuration (SEC_USER_AGENT required)
 **Requirements**:
-- [ ] Use existing scraper's call pattern; do not change internals unless absolutely required
-- [ ] If EDGAR headers/rate-limits needed, STOP and add minimal .env.example entries
-- [ ] Surface `as_of` from filing; set `source='sec_edgar'`
-- [ ] Avoid unnecessary normalization; return scraper's shape
+- [x] Use existing scraper's call pattern; do not change internals unless absolutely required
+- [x] If EDGAR headers/rate-limits needed, STOP and add minimal .env.example entries
+- [x] Surface `as_of` from filing; set `source='sec_edgar'`
+- [x] Avoid unnecessary normalization; return scraper's shape
 **Tests**: Fixture from scraper's parsed output → adapter returns expected raw shape.
 **Commit**: `feat(data): T5 13F adapter over existing scraper + minimal .env`
 

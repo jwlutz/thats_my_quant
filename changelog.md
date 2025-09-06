@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T5: 13F Adapter Wrapper
+- Implemented fetch_13f_quarter wrapper around existing data_extraction.py scraper
+- Added quarter-end validation and filing deadline calculation (Q1-Q4 mapping)
+- Environment variable configuration for SEC compliance (SEC_USER_AGENT required)
+- Supports both entity name and CIK lookup methods
+- All scraper calls mocked in tests (11 test cases) - preserves existing scraper unchanged
+
 #### T4: yfinance Adapter
 - Implemented fetch_prices_window with Yahoo Finance integration
 - Added comprehensive input validation (date ranges, ticker format)
