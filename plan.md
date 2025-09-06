@@ -109,11 +109,14 @@
 **Tests**: Fixture from scraper's parsed output → adapter returns expected raw shape.
 **Commit**: `feat(data): T5 13F adapter over existing scraper + minimal .env`
 
-#### T6 — runs Registry & Metrics (thin IO)
+#### T6 — runs Registry & Metrics (thin IO) ✅
 **Goal**: Create/run/close rows; capture counts + status + log path.
 **Functions**:
-- [ ] `start_run(dag_name) -> run_id`
-- [ ] `finish_run(run_id, status, rows_in, rows_out, log_path) -> None`
+- [x] `start_run(dag_name) -> run_id`
+- [x] `finish_run(run_id, status, rows_in, rows_out, log_path) -> None`
+- [x] `get_run_status(run_id)` - detailed run info with computed metrics
+- [x] `list_recent_runs()` - recent runs with filtering and limits
+- [x] `get_dag_stats()` - aggregate statistics for DAG performance
 **Tests**: In-memory DB; status transitions; timestamps set; counts correct.
 **Commit**: `feat(data): T6 runs registry with metrics`
 

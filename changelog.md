@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T6: runs Registry & Metrics
+- Implemented complete run lifecycle tracking (start_run, finish_run, get_run_status)
+- Added run listing and filtering with list_recent_runs (by DAG, with limits)
+- Built aggregate statistics with get_dag_stats (success rates, duration, throughput)
+- Comprehensive metrics calculation (duration, success rates, rows processed)
+- All operations tested with in-memory SQLite (15 test cases) - proven reliable
+
 #### T5: 13F Adapter Wrapper
 - Implemented fetch_13f_quarter wrapper around existing data_extraction.py scraper
 - Added quarter-end validation and filing deadline calculation (Q1-Q4 mapping)
