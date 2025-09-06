@@ -86,10 +86,12 @@
 **Tests**: In-memory SQLite; two consecutive upserts yield identical table state; PK uniqueness.
 **Commit**: `feat(data): T3 sqlite upsert loaders with idempotence tests`
 
-#### T4 — yfinance Adapter (provider; network allowed, mocked in tests)
+#### T4 — yfinance Adapter (provider; network allowed, mocked in tests) ✅
 **Goal**: Windowed fetch without business logic or "cleanup."
 **Function**:
-- [ ] `fetch_prices_window(ticker, start, end) -> list[raw_rows]`
+- [x] `fetch_prices_window(ticker, start, end) -> list[raw_rows]`
+- [x] Input validation (date range, ticker format)
+- [x] Error handling with custom YFinanceError
 **Tests**: Mock network; assert shape only. No live calls in CI.
 **Commit**: `feat(data): T4 yfinance adapter (mocked tests)`
 

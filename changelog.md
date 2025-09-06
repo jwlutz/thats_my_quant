@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T4: yfinance Adapter
+- Implemented fetch_prices_window with Yahoo Finance integration
+- Added comprehensive input validation (date ranges, ticker format)
+- All network calls mocked in tests (10 test cases) - no live API hits
+- Handles empty responses, partial data, and network errors gracefully
+- Returns raw provider format - no business logic or normalization
+
 #### T3: Loader Idempotence
 - Implemented upsert_prices and upsert_13f with SQLite backend
 - Added init_database with proper table creation and indices
