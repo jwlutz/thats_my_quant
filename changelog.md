@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T0: Schema Contracts
+- Created SCHEMAS.md with canonical row shapes for prices, holdings_13f, and runs tables
+- Added schema contract tests with type validation and fixtures
+- Established primary keys and constraints for each table
+- Documented provenance fields (source, as_of, ingested_at) for traceability
+
 #### Initial Project Scaffold
 - Created comprehensive Cursor Rules system in `.cursor/rules/`
   - `core.mdc`: 95% confidence gate, no hallucinations policy

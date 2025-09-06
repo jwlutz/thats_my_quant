@@ -39,19 +39,85 @@
    - [ ] Set up directory structure
    - [ ] Create .gitignore and .env.example
 
-### Phase 2: Data Layer
-2. **Database Setup** (2 hours)
-   - [ ] Create SQLite schema (runs, prices, holdings_13f)
-   - [ ] Build connection manager
-   - [ ] Create migration system
-   - [ ] Add indices for performance
+### Phase 2: Data Layer (TDD Micro-Steps)
 
-3. **Ingestion Module** (3 hours)
-   - [ ] Adapt existing 13F scraper to new structure
-   - [ ] Build yfinance wrapper with error handling
-   - [ ] Create data validators
-   - [ ] Implement caching layer
-   - [ ] Add rate limiting
+#### T0 — Schema Contracts (no code, no IO) ✅
+**Goal**: Freeze canonical row shapes & PKs in SCHEMAS.md + schema contract tests.
+**Acceptance**:
+- [x] SCHEMAS.md lists `prices`, `holdings_13f`, `runs` exactly as defined
+- [x] Add tiny fixture dicts and a schema test that asserts keys/types (no DB)
+**Deliverables**: updated SCHEMAS.md; tests red→green; commit: `feat(data): T0 schema contracts & schema tests`
+
+#### T1 — Core Validators (pure)
+**Goal**: Deterministic validators for canonical rows.
+**Functions**:
+- [ ] `validate_prices_row(row) -> None|Error`
+- [ ] `validate_13f_row(row) -> None|Error`
+**Properties**: required keys present; numerics finite; separate helper to check date monotonicity per ticker.
+**Tests**: unit + property tests; fail closed on missing/extra keys or invalid numerics.
+**Commit**: `feat(data): T1 validators for prices & 13F`
+
+#### T2 — Normalizers (pure; minimal normalization)
+**Goal**: Transform provider-native rows → canonical shapes with ONLY necessary coercions.
+**Functions**:
+- [ ] `normalize_prices(raw_rows, *, ticker, source, as_of) -> list[canonical]`
+- [ ] `normalize_13f(raw_rows, *, source, as_of) -> list[canonical]`
+**Rules**:
+- [ ] Do not uppercase/trim if provider output is already normalized or schema accepts it
+- [ ] Only normalize when justified (comment + plan.md note)
+**Tests**: Golden fixtures (AAPL 2 days; tiny 13F snapshot). Exact canonical output; PK uniqueness.
+**Commit**: `feat(data): T2 normalizers with golden fixtures`
+
+#### T3 — Loader Idempotence (thin IO, SQLite)
+**Goal**: Idempotent upsert writers.
+**Functions**:
+- [ ] `upsert_prices(rows) -> (inserted:int, updated:int)`
+- [ ] `upsert_13f(rows) -> (inserted:int, updated:int)`
+**Tests**: In-memory SQLite; two consecutive upserts yield identical table state; PK uniqueness.
+**Commit**: `feat(data): T3 sqlite upsert loaders with idempotence tests`
+
+#### T4 — yfinance Adapter (provider; network allowed, mocked in tests)
+**Goal**: Windowed fetch without business logic or "cleanup."
+**Function**:
+- [ ] `fetch_prices_window(ticker, start, end) -> list[raw_rows]`
+**Tests**: Mock network; assert shape only. No live calls in CI.
+**Commit**: `feat(data): T4 yfinance adapter (mocked tests)`
+
+#### T5 — 13F Adapter Wrapper (over existing data_extraction.py)
+**Goal**: Stable interface around our scraper; do not rewrite.
+**Function**:
+- [ ] `fetch_13f_quarter(ticker, *, quarter_end) -> list[raw_rows]`
+**Requirements**:
+- [ ] Use existing scraper's call pattern; do not change internals unless absolutely required
+- [ ] If EDGAR headers/rate-limits needed, STOP and add minimal .env.example entries
+- [ ] Surface `as_of` from filing; set `source='sec_edgar'`
+- [ ] Avoid unnecessary normalization; return scraper's shape
+**Tests**: Fixture from scraper's parsed output → adapter returns expected raw shape.
+**Commit**: `feat(data): T5 13F adapter over existing scraper + minimal .env`
+
+#### T6 — runs Registry & Metrics (thin IO)
+**Goal**: Create/run/close rows; capture counts + status + log path.
+**Functions**:
+- [ ] `start_run(dag_name) -> run_id`
+- [ ] `finish_run(run_id, status, rows_in, rows_out, log_path) -> None`
+**Tests**: In-memory DB; status transitions; timestamps set; counts correct.
+**Commit**: `feat(data): T6 runs registry with metrics`
+
+#### T7 — DAG: daily_prices (orchestration only)
+**Goal**: Compose adapter → normalizer → validator → loader with logging.
+**Spec**:
+- [ ] pipeline/dags/daily_prices.yml with {tickers, start, end} (default: last 365 calendar days)
+**Function**:
+- [ ] `run_daily_prices(spec) -> summary dict`
+**Tests**: Integration using stubbed adapter + real normalizer/loader; assert row counts and runs row.
+**Commit**: `feat(data): T7 daily_prices DAG + integration test`
+
+#### T8 — DAG: quarterly_13f (orchestration only)
+**Goal**: Provider → normalizer → validator → loader; quarterly cadence.
+**Spec**:
+- [ ] {tickers, quarter_end}
+**Tests**: Integration test; assert PK uniqueness (cik, cusip, as_of) and proper runs logging.
+**Commit**: `feat(data): T8 quarterly_13f DAG + integration test`
 
 ### Phase 3: Analysis Engine
 4. **Metrics Calculator** (2 hours)
