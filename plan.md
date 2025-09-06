@@ -76,11 +76,13 @@
 - Primary key deduplication (prevents DB constraint violations)
 - Ticker inference from issuer name (enables price-holdings joins)
 
-#### T3 — Loader Idempotence (thin IO, SQLite)
+#### T3 — Loader Idempotence (thin IO, SQLite) ✅
 **Goal**: Idempotent upsert writers.
 **Functions**:
-- [ ] `upsert_prices(rows) -> (inserted:int, updated:int)`
-- [ ] `upsert_13f(rows) -> (inserted:int, updated:int)`
+- [x] `upsert_prices(rows) -> (inserted:int, updated:int)`
+- [x] `upsert_13f(rows) -> (inserted:int, updated:int)`
+- [x] `init_database(conn)` - creates tables with indices
+- [x] `upsert_run()` - for run tracking
 **Tests**: In-memory SQLite; two consecutive upserts yield identical table state; PK uniqueness.
 **Commit**: `feat(data): T3 sqlite upsert loaders with idempotence tests`
 

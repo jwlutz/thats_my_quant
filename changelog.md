@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T3: Loader Idempotence
+- Implemented upsert_prices and upsert_13f with SQLite backend
+- Added init_database with proper table creation and indices
+- All loaders proven idempotent through comprehensive tests (11 test cases)
+- Uses in-memory SQLite for fast, isolated testing
+- Handles mixed insert/update batches correctly
+
 #### T2: Normalizers
 - Implemented normalize_prices and normalize_13f pure transformation functions
 - Created golden test fixtures for AAPL prices and Berkshire 13F data
