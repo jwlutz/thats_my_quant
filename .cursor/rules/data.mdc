@@ -1,0 +1,194 @@
+# Data Rules - AUTO ATTACHED: ingestion/**, analysis/**
+
+## DATA SCHEMAS
+
+### Core Tables
+
+#### 1. runs
+```sql
+CREATE TABLE runs (
+    run_id TEXT PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    started_at TIMESTAMP NOT NULL,
+    completed_at TIMESTAMP,
+    status TEXT CHECK(status IN ('running', 'completed', 'failed')),
+    report_path TEXT,
+    error_message TEXT,
+    parameters JSON,
+    data_sources JSON
+);
+```
+
+#### 2. prices
+```sql
+CREATE TABLE prices (
+    ticker TEXT NOT NULL,
+    date DATE NOT NULL,
+    open REAL NOT NULL CHECK(open > 0),
+    high REAL NOT NULL CHECK(high > 0),
+    low REAL NOT NULL CHECK(low > 0),
+    close REAL NOT NULL CHECK(close > 0),
+    volume INTEGER CHECK(volume >= 0),
+    adjusted_close REAL CHECK(adjusted_close > 0),
+    as_of TIMESTAMP NOT NULL,
+    source TEXT NOT NULL,
+    PRIMARY KEY (ticker, date)
+);
+```
+
+#### 3. holdings_13f
+```sql
+CREATE TABLE holdings_13f (
+    filing_id TEXT,
+    cik TEXT NOT NULL,
+    company_name TEXT NOT NULL,
+    filing_date DATE NOT NULL,
+    report_period DATE NOT NULL,
+    cusip TEXT,
+    issuer_name TEXT,
+    value INTEGER CHECK(value >= 0),
+    shares INTEGER CHECK(shares >= 0),
+    share_type TEXT,
+    as_of TIMESTAMP NOT NULL,
+    PRIMARY KEY (filing_id, cusip)
+);
+```
+
+## DATA INTEGRITY
+
+### Mandatory Fields
+- **as_of**: When data was fetched (not market date)
+- **source**: Where data came from (yfinance, SEC, manual)
+- **ticker**: Normalized to uppercase
+- **dates**: ISO format YYYY-MM-DD
+
+### Validation Rules
+```python
+def validate_price_data(df: pd.DataFrame) -> pd.DataFrame:
+    # Required columns
+    required = ['date', 'open', 'high', 'low', 'close', 'volume']
+    assert all(col in df.columns for col in required)
+    
+    # No nulls in prices
+    assert df[['open', 'high', 'low', 'close']].notna().all().all()
+    
+    # Price logic
+    assert (df['high'] >= df['low']).all()
+    assert (df['high'] >= df['open']).all()
+    assert (df['high'] >= df['close']).all()
+    
+    # Chronological order
+    assert df['date'].is_monotonic_increasing
+    
+    return df
+```
+
+## MISSING DATA POLICY
+
+### Handling Gaps
+```python
+# Document gaps, don't fill
+def identify_gaps(df: pd.DataFrame) -> List[Dict]:
+    gaps = []
+    dates = pd.to_datetime(df['date'])
+    for i in range(1, len(dates)):
+        diff = (dates.iloc[i] - dates.iloc[i-1]).days
+        if diff > 3:  # More than weekend
+            gaps.append({
+                'start': dates.iloc[i-1],
+                'end': dates.iloc[i],
+                'trading_days_missing': diff - 2
+            })
+    return gaps
+```
+
+### Reporting Missing Data
+- Never interpolate without explicit flag
+- Report "Not available" in outputs
+- Log missing data statistics
+- Include data coverage in metadata
+
+## DATA FRESHNESS
+
+### Staleness Thresholds
+```python
+STALENESS_LIMITS = {
+    'prices': timedelta(days=1),    # Daily update expected
+    '13f': timedelta(days=45),      # Quarterly filings
+    'report': timedelta(hours=24),  # Regenerate daily
+}
+
+def is_stale(data_type: str, as_of: datetime) -> bool:
+    age = datetime.now() - as_of
+    return age > STALENESS_LIMITS.get(data_type, timedelta(days=7))
+```
+
+### Refresh Strategy
+1. Check staleness before use
+2. Warn if using stale data
+3. Option to force refresh
+4. Cache with expiration
+
+## DATA STORAGE
+
+### Directory Structure
+```
+data/
+├── cache/           # Temporary, can be deleted
+│   ├── prices/     # JSON files by ticker
+│   └── 13f/        # XML/JSON responses
+├── processed/       # Cleaned, validated data
+│   ├── prices/     # Parquet files
+│   └── holdings/   # Parquet files
+├── research.db      # SQLite database
+└── logs/           # Data quality logs
+```
+
+### File Formats
+- **Prices**: Parquet (compressed, typed)
+- **Holdings**: Parquet
+- **Reports**: Markdown + JSON metadata
+- **Cache**: JSON (human readable)
+
+## DATA LINEAGE
+
+### Tracking Sources
+```python
+@dataclass
+class DataProvenance:
+    source: str          # yfinance, SEC, manual
+    fetched_at: datetime
+    parameters: Dict     # API parameters used
+    version: str        # Data provider version
+    checksum: str       # For verification
+```
+
+### Audit Trail
+```python
+def log_data_operation(operation: str, details: Dict):
+    with open('data/logs/data_audit.jsonl', 'a') as f:
+        entry = {
+            'timestamp': datetime.now().isoformat(),
+            'operation': operation,
+            'details': details
+        }
+        f.write(json.dumps(entry) + '\n')
+```
+
+## PROHIBITED PRACTICES
+
+- ❌ Silent data interpolation
+- ❌ Modifying raw data files
+- ❌ Assuming market hours
+- ❌ Hard-coding date ranges
+- ❌ Filling weekends as trading days
+- ❌ Using data without as_of stamps
+
+## DATA QUALITY METRICS
+
+Track and report:
+- Coverage: % of expected data points present
+- Freshness: Age of newest data point
+- Completeness: Required fields populated
+- Validity: % passing validation rules
+- Source diversity: Number of sources per metric

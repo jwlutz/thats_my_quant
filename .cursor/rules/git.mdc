@@ -1,0 +1,83 @@
+# Git Rules - AGENT REQUESTED
+
+## COMMIT STANDARDS
+
+### Message Format
+```
+<type>(<scope>): <short summary>
+
+- Bullet point changes
+- What was modified
+- Why this change now
+
+Refs: #issue-number (if applicable)
+```
+
+### Types
+- `feat`: New feature
+- `fix`: Bug fix
+- `chore`: Maintenance/cleanup
+- `docs`: Documentation only
+- `test`: Test additions/fixes
+- `refactor`: Code restructuring
+- `perf`: Performance improvement
+- `style`: Formatting only
+
+### Scope Examples
+- `(ingestion)`: Data ingestion modules
+- `(analysis)`: Metric calculation
+- `(reporting)`: Report generation
+- `(db)`: Database operations
+- `(api)`: External API interactions
+
+## COMMIT HYGIENE
+
+1. **Atomic Commits**:
+   - One logical change per commit
+   - Should compile/run after each commit
+   - Never mix refactoring with features
+
+2. **Commit Frequency**:
+   - After each successful test
+   - Before any risky operation
+   - At natural stopping points
+   - Maximum 50 lines changed per commit (prefer smaller)
+
+3. **Branch Strategy**:
+   ```
+   main → always deployable
+   └── feature/name → isolated development
+   └── fix/issue → bug fixes
+   └── experiment/idea → exploration
+   ```
+
+## FORBIDDEN PRACTICES
+
+- ❌ Commits with "WIP" or "temp"
+- ❌ Bundling unrelated changes
+- ❌ Committing sensitive data
+- ❌ Force pushing to main
+- ❌ Commits that break tests
+
+## PRE-COMMIT CHECKLIST
+
+- [ ] Code runs without errors
+- [ ] Tests pass (if exist)
+- [ ] No hardcoded secrets
+- [ ] Meaningful commit message
+- [ ] Related files grouped together
+
+## RECOVERY PROCEDURES
+
+### Accidental Secret Commit
+```bash
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch PATH_TO_FILE" \
+  --prune-empty --tag-name-filter cat -- --all
+```
+
+### Undo Last Commit (not pushed)
+```bash
+git reset --soft HEAD~1  # Keep changes
+git reset --hard HEAD~1  # Discard changes
+```

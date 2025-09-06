@@ -1,0 +1,197 @@
+# Security Rules - ALWAYS ACTIVE
+
+## SECRETS MANAGEMENT
+
+### NEVER Commit
+- API keys (OpenAI, yfinance premium, etc.)
+- Database credentials
+- Personal emails/usernames
+- Authentication tokens
+- Local file paths with usernames
+
+### Environment Variables
+```python
+# Always use environment variables
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not set in environment")
+```
+
+### .env.example Template
+```bash
+# Create this file as reference
+OPENAI_API_KEY=sk-...your-key-here...
+OLLAMA_BASE_URL=http://localhost:11434
+SEC_USER_AGENT="Your Name your.email@example.com"
+DB_PATH=./data/research.db
+LOG_LEVEL=INFO
+```
+
+## GITIGNORE ESSENTIALS
+
+Must include:
+```gitignore
+# Environment
+.env
+.env.local
+*.env
+
+# Data
+/data/*.db
+/data/cache/
+/reports/*.html
+*.csv
+*.xlsx
+
+# Logs
+/logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+/tmp/
+/temp/
+*.tmp
+```
+
+## DATA PRIVACY
+
+### PII Handling
+- No customer data in logs
+- Anonymize tickers in test data if needed
+- No email addresses in code comments
+- Hash/encrypt sensitive identifiers
+
+### Local-First Principles
+- All data stays on user's machine
+- No telemetry or usage tracking
+- No automatic cloud backups
+- User controls all data exports
+
+## API SECURITY
+
+### Rate Limiting
+```python
+# Respect API limits
+from time import sleep
+from functools import wraps
+
+def rate_limit(calls_per_second=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sleep(1.0 / calls_per_second)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+```
+
+### Request Headers
+```python
+# Always identify yourself to SEC
+headers = {
+    'User-Agent': os.getenv('SEC_USER_AGENT', 'Default dev@example.com')
+}
+```
+
+## INPUT VALIDATION
+
+### User Inputs
+```python
+# Validate ticker symbols
+import re
+
+def validate_ticker(ticker: str) -> str:
+    if not re.match(r'^[A-Z]{1,5}$', ticker.upper()):
+        raise ValueError(f"Invalid ticker format: {ticker}")
+    return ticker.upper()
+```
+
+### File Paths
+```python
+# Prevent directory traversal
+import os
+
+def safe_path(user_path: str, base_dir: str) -> str:
+    # Resolve to absolute path
+    full_path = os.path.abspath(os.path.join(base_dir, user_path))
+    # Ensure it's within base_dir
+    if not full_path.startswith(os.path.abspath(base_dir)):
+        raise ValueError("Path traversal attempt detected")
+    return full_path
+```
+
+## DATABASE SECURITY
+
+### SQL Injection Prevention
+```python
+# Always use parameterized queries
+# NEVER use string formatting for SQL
+
+# BAD
+query = f"SELECT * FROM stocks WHERE ticker = '{ticker}'"
+
+# GOOD
+query = "SELECT * FROM stocks WHERE ticker = ?"
+cursor.execute(query, (ticker,))
+```
+
+### Connection Security
+```python
+# Use connection pooling
+# Set appropriate timeouts
+# Use read-only connections where possible
+```
+
+## ERROR MESSAGES
+
+### Safe Error Reporting
+```python
+# Don't leak system information
+try:
+    process_data()
+except Exception as e:
+    # Log full error internally
+    logger.error(f"Processing failed: {e}", exc_info=True)
+    # Return sanitized message to user
+    return "Data processing failed. Check logs for details."
+```
+
+## DEPENDENCY SECURITY
+
+### Verification
+```bash
+# Regular audits
+pip-audit
+
+# Lock versions
+pip freeze > requirements.txt
+
+# Minimal dependencies
+# Justify each addition in plan.md
+```
+
+### Safe Defaults
+- HTTPS only for external requests
+- Timeouts on all network calls
+- Validate SSL certificates
+- No eval() or exec() on user input

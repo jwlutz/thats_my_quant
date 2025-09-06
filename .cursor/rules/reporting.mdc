@@ -1,0 +1,231 @@
+# Reporting Rules - AUTO ATTACHED: reports/**
+
+## REPORT PHILOSOPHY
+
+- **Markdown-first**: Human readable, version controllable
+- **Data-driven**: All numbers from code, not LLM
+- **LLM for prose only**: Narrative, context, not calculations
+- **Traceable**: Every claim has a source
+
+## REPORT STRUCTURE
+
+### Standard Template
+```markdown
+# Stock Research Report: {TICKER}
+
+## Metadata
+- Generated: {timestamp}
+- Ticker: {ticker}
+- Data Period: {start_date} to {end_date}
+- Data Sources: {sources_list}
+- Report ID: {run_id}
+
+## Executive Summary
+{LLM_generated_summary_max_200_words}
+
+## Price Analysis
+
+### Current Snapshot
+| Metric | Value | As Of |
+|--------|-------|-------|
+| Last Close | ${close} | {date} |
+| 52W High | ${high} | {date} |
+| 52W Low | ${low} | {date} |
+| Volume (30D Avg) | {volume} | {date} |
+
+### Performance Metrics
+| Period | Return | Volatility | Max Drawdown |
+|--------|--------|------------|--------------|
+| 1D | {val}% | - | - |
+| 1W | {val}% | {vol}% | {dd}% |
+| 1M | {val}% | {vol}% | {dd}% |
+| 3M | {val}% | {vol}% | {dd}% |
+| 6M | {val}% | {vol}% | {dd}% |
+| 1Y | {val}% | {vol}% | {dd}% |
+
+## Institutional Holdings (13F)
+
+### Top Holders
+| Institution | Shares | Value ($M) | % of Portfolio | Change QoQ |
+|------------|--------|------------|----------------|------------|
+{top_10_holders_table}
+
+### Concentration Metrics
+- Top 10 Holders Own: {concentration}%
+- Institutional Ownership: {inst_own}%
+- Number of Holders: {holder_count}
+
+## Risk Factors
+{LLM_generated_risks_max_150_words}
+
+## Data Quality Notes
+- Price Data Coverage: {coverage}%
+- Latest 13F Filing: {date}
+- Data Gaps: {gap_list_or_none}
+
+## Appendix
+
+### Data Sources
+- Prices: {source} via yfinance
+- 13F: SEC EDGAR
+- Generated: {timestamp}
+
+### Disclaimer
+This report is for informational purposes only. Not investment advice.
+```
+
+## LLM INTEGRATION
+
+### Input Contract
+```python
+llm_input = {
+    "ticker": "AAPL",
+    "company_name": "Apple Inc.",
+    "metrics": {
+        "returns": {...},
+        "volatility": {...},
+        "holdings": {...}
+    },
+    "constraints": {
+        "summary_words": 200,
+        "risks_words": 150,
+        "tone": "professional, objective"
+    }
+}
+```
+
+### Prompt Template
+```python
+SUMMARY_PROMPT = """
+Given the following metrics for {ticker}:
+- 1Y Return: {return_1y}%
+- Volatility: {vol_1y}%
+- Top Holder: {top_holder} ({concentration}%)
+
+Write a 200-word executive summary that:
+1. States the key performance metrics
+2. Notes institutional interest
+3. Maintains neutral tone
+4. Does NOT speculate on future performance
+5. Does NOT invent any numbers
+
+If data is missing, state "Data not available for [metric]."
+"""
+```
+
+### LLM Response Validation
+```python
+def validate_llm_response(response: str, max_words: int) -> str:
+    # Check word count
+    words = len(response.split())
+    if words > max_words * 1.1:  # 10% tolerance
+        raise ValueError(f"Response too long: {words} words")
+    
+    # Check for prohibited content
+    prohibited = ['will', 'should', 'recommend', 'buy', 'sell']
+    for word in prohibited:
+        if word.lower() in response.lower():
+            raise ValueError(f"Prohibited word found: {word}")
+    
+    # Check for hallucinated numbers
+    import re
+    numbers = re.findall(r'\d+\.?\d*%?', response)
+    # Verify each number exists in input data
+    
+    return response
+```
+
+## FORMATTING STANDARDS
+
+### Numbers
+- Percentages: 2 decimal places (12.34%)
+- Dollars: Appropriate scale ($1.2M, $534K)
+- Dates: YYYY-MM-DD
+- Large numbers: Comma separated (1,234,567)
+
+### Missing Data
+```markdown
+| Metric | Value |
+|--------|-------|
+| Return | Not available |
+| Volume | Not available* |
+
+* Data unavailable due to [reason]
+```
+
+### Tables
+- Always include headers
+- Right-align numbers
+- Left-align text
+- Use "-" for null values
+- Sort by relevance/magnitude
+
+## OUTPUT FORMATS
+
+### Primary: Markdown
+```python
+def save_report(report: str, ticker: str, run_id: str):
+    filename = f"reports/{ticker}_{run_id}_{timestamp}.md"
+    with open(filename, 'w') as f:
+        f.write(report)
+    return filename
+```
+
+### Metadata: JSON
+```python
+metadata = {
+    "run_id": run_id,
+    "ticker": ticker,
+    "generated_at": timestamp,
+    "data_sources": sources,
+    "coverage": coverage_pct,
+    "warnings": warnings_list
+}
+```
+
+### Optional: PDF
+- Only if requested
+- Use markdown-to-pdf converter
+- Preserve all tables and formatting
+
+## QUALITY CHECKS
+
+### Pre-Generation
+- [ ] All required data present
+- [ ] Data validated and within bounds
+- [ ] Calculations verified
+- [ ] Time periods consistent
+
+### Post-Generation
+- [ ] No hallucinated numbers
+- [ ] Word limits respected
+- [ ] All sections populated
+- [ ] Disclaimer present
+- [ ] Metadata complete
+
+## PROHIBITED IN REPORTS
+
+- ❌ Price targets
+- ❌ Buy/sell recommendations
+- ❌ Future predictions
+- ❌ Unsubstantiated claims
+- ❌ Data without timestamps
+- ❌ Interpolated/estimated values without flags
+
+## REPORT VERSIONING
+
+```python
+def version_report(ticker: str, content: str):
+    # Save with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = f"reports/{ticker}_{timestamp}.md"
+    
+    # Keep last 10 versions
+    cleanup_old_reports(ticker, keep=10)
+    
+    # Link to latest
+    latest = f"reports/{ticker}_latest.md"
+    os.symlink(path, latest)
+    
+    return path
+```

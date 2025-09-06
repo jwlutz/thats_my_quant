@@ -1,0 +1,7 @@
+# Reports Directory
+
+Generated research reports will be saved here as Markdown files.
+
+Naming convention: `{TICKER}_{RUN_ID}_{TIMESTAMP}.md`
+
+All report files are excluded from git.

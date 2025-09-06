@@ -1,0 +1,9 @@
+# Data Directory
+
+This directory contains:
+- `/cache/` - Temporary cached API responses
+- `/processed/` - Cleaned and validated data
+- `research.db` - SQLite database (will be created on first run)
+- `/logs/` - Data quality and audit logs
+
+All data files are excluded from git.

@@ -1,0 +1,65 @@
+# Planning Rules - ALWAYS ACTIVE
+
+## TASK INITIATION
+
+When starting ANY task:
+
+1. **Update Living Documents**:
+   - `plan.md`: Current objectives, constraints, acceptance criteria
+   - `assumptions.md`: What we're assuming and how to validate
+   - `risks.md`: What could go wrong and detection signals
+   - `changelog.md`: Major decisions and their rationale
+
+2. **Pre-Mortem Analysis**:
+   Before each significant step, list:
+   - 3 ways this could fail
+   - How to detect each failure mode
+   - Recovery strategy for each
+
+3. **Scope Management**:
+   - Define "done" explicitly
+   - List non-goals to prevent scope creep
+   - Time-box exploration phases
+   - Flag when approaching scope boundaries
+
+## PLANNING ARTIFACTS
+
+### plan.md Structure
+```markdown
+# Current Sprint: [Name]
+## Objectives
+- [ ] Clear, measurable goals
+
+## Constraints
+- Time: X hours/days
+- Dependencies: Listed explicitly
+- Resources: What's available
+
+## Acceptance Criteria
+- Specific conditions for "done"
+- Test scenarios that must pass
+
+## Task Graph
+1. Task (estimated time) → Dependencies
+```
+
+### Decision Records
+- Use ADR format for significant choices
+- Include: Context, Options, Decision, Consequences
+- Link from changelog.md
+
+## PROGRESS TRACKING
+
+- Update task status in real-time
+- Log blockers immediately
+- Estimate → Actual time comparison
+- Daily summaries in changelog
+
+## PIVOT PROTOCOL
+
+When plan needs change:
+1. Document why current approach failed
+2. List lessons learned
+3. Propose alternatives with trade-offs
+4. Get stakeholder input on major pivots
+5. Update all planning docs before proceeding

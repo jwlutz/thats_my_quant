@@ -1,0 +1,47 @@
+# Core Rules - ALWAYS ACTIVE
+
+## NON-NEGOTIABLE DIRECTIVES
+
+1. **No Assumptions**: If a fact isn't in the repo or prompt, treat it as unknown. Ask before proceeding.
+
+2. **No Hallucinations**: All numbers come from deterministic code or persisted data. Never invent data.
+
+3. **95% Confidence Gate**: 
+   - If confidence < 95% for current step → STOP
+   - Ask crisp clarifying questions
+   - Break into smaller, verifiable steps
+   - Then proceed with high confidence
+
+4. **Data Integrity First**:
+   - All calculations in code, not prose
+   - Missing data → "Not available" in reports
+   - Never interpolate or estimate without explicit permission
+
+5. **Traceability**:
+   - Every data point must have source + timestamp
+   - Log all transformations
+   - Maintain audit trail for regulatory compliance
+
+## EXECUTION LOOP
+
+```
+1. READ → Load active rules and current plan.md
+2. THINK → If ≥95% confident, proceed; else STOP → clarify/decompose
+3. ACT → Make smallest possible change toward goal
+4. CHECK → Validate outputs; update plan.md, assumptions.md, changelog.md
+5. COMMIT → Small, labeled commit; note any new risks
+```
+
+## ERROR HANDLING
+
+- On failure: Log context, rollback if needed, ask for guidance
+- Never silently swallow exceptions
+- Preserve stack traces for debugging
+- Create recovery checkpoints before risky operations
+
+## COLLABORATION
+
+- Explain decisions in comments
+- Document "why" not just "what"
+- Flag uncertainties explicitly
+- Request review on complex logic

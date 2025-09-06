@@ -1,0 +1,139 @@
+# Testing Rules - AUTO ATTACHED: tests/**, */*test*
+
+## TEST PHILOSOPHY
+
+- **Test behavior, not implementation**
+- **Fast feedback loops** (unit tests < 100ms)
+- **Deterministic outcomes** (no flaky tests)
+- **Test data as code** (version controlled)
+
+## TEST CATEGORIES
+
+### 1. Data Validation Tests
+```python
+def test_price_data_integrity():
+    # Check: No negative prices
+    # Check: Dates in expected range
+    # Check: No gaps > threshold
+    # Check: Volume is integer
+```
+
+### 2. Calculation Tests
+```python
+def test_returns_calculation():
+    # Given: Known price series
+    # When: Calculate returns
+    # Then: Match expected values ±0.0001
+```
+
+### 3. Snapshot/Golden Tests
+```python
+def test_report_generation():
+    # Load golden ticker data
+    # Generate report
+    # Compare with expected_report.md
+    # Flag any deviations
+```
+
+## TEST STANDARDS
+
+### Naming Convention
+```python
+test_<unit>_<scenario>_<expected_outcome>()
+# Examples:
+test_volatility_zero_prices_raises_error()
+test_13f_parser_missing_cusip_uses_none()
+test_report_no_data_shows_not_available()
+```
+
+### Test Structure (AAA)
+```python
+def test_something():
+    # Arrange - Set up test data
+    data = create_test_data()
+    
+    # Act - Execute function
+    result = function_under_test(data)
+    
+    # Assert - Verify outcome
+    assert result == expected
+```
+
+## GOLDEN DATA MANAGEMENT
+
+### Location
+```
+tests/fixtures/
+├── golden/
+│   ├── AAPL_report_2024_01_01.md
+│   ├── MSFT_metrics_2024_01_01.json
+│   └── SPY_13f_snapshot.csv
+└── mock/
+    ├── empty_13f.xml
+    ├── malformed_prices.json
+    └── rate_limited_response.json
+```
+
+### Refresh Protocol
+1. Flag when golden data > 30 days old
+2. Document why/when refreshing
+3. Review diff before committing
+4. Update test assertions if needed
+
+## REQUIRED TEST COVERAGE
+
+### Before LLM Calls
+- Validate input data structure
+- Check for required fields
+- Verify data within bounds
+- Ensure no nulls where not allowed
+
+### Critical Paths (100% coverage required)
+- Price data ingestion
+- Return calculations
+- 13F XML parsing
+- Report generation
+- Database operations
+
+## TEST DOUBLES
+
+### When to Mock
+- External APIs (yfinance, SEC)
+- Current date/time
+- Random number generation
+- File system (for unit tests)
+
+### Mock Standards
+```python
+@patch('yfinance.download')
+def test_with_mock(mock_download):
+    mock_download.return_value = KNOWN_PRICES
+    # Test logic here
+```
+
+## CONTINUOUS TESTING
+
+### Pre-commit
+- Run unit tests for changed files
+- Validate no broken imports
+- Check test coverage didn't decrease
+
+### Pre-push
+- Full test suite
+- Integration tests
+- Snapshot comparisons
+
+### Test Commands
+```bash
+# Quick validation
+pytest tests/unit -v --tb=short
+
+# Full suite
+pytest tests/ --cov=. --cov-report=term-missing
+
+# Specific feature
+pytest tests/ -k "13f" -v
+
+# Update snapshots
+pytest tests/ --snapshot-update
+```
