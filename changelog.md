@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T1: Core Validators
+- Implemented validate_prices_row and validate_13f_row pure functions
+- Added comprehensive validation for required keys, types, and numeric constraints
+- Implemented check_price_date_monotonicity for date sequence validation
+- All validators fail closed on invalid data (no silent errors)
+
 #### T0: Schema Contracts
 - Created SCHEMAS.md with canonical row shapes for prices, holdings_13f, and runs tables
 - Added schema contract tests with type validation and fixtures

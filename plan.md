@@ -48,11 +48,11 @@
 - [x] Add tiny fixture dicts and a schema test that asserts keys/types (no DB)
 **Deliverables**: updated SCHEMAS.md; tests red→green; commit: `feat(data): T0 schema contracts & schema tests`
 
-#### T1 — Core Validators (pure)
+#### T1 — Core Validators (pure) ✅
 **Goal**: Deterministic validators for canonical rows.
 **Functions**:
-- [ ] `validate_prices_row(row) -> None|Error`
-- [ ] `validate_13f_row(row) -> None|Error`
+- [x] `validate_prices_row(row) -> None|Error`
+- [x] `validate_13f_row(row) -> None|Error`
 **Properties**: required keys present; numerics finite; separate helper to check date monotonicity per ticker.
 **Tests**: unit + property tests; fail closed on missing/extra keys or invalid numerics.
 **Commit**: `feat(data): T1 validators for prices & 13F`
