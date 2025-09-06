@@ -134,10 +134,17 @@
 **Tests**: Integration using mocked adapter + real normalizer/loader; assert row counts and runs row.
 **Commit**: `feat(data): T7 daily_prices DAG + integration test`
 
-#### T8 — DAG: quarterly_13f (orchestration only)
+#### T8 — DAG: quarterly_13f (orchestration only) ✅
 **Goal**: Provider → normalizer → validator → loader; quarterly cadence.
 **Spec**:
-- [ ] {tickers, quarter_end}
+- [x] `Quarterly13FConfig` with entity_name/cik + quarter_end validation
+- [x] `run_quarterly_13f(config, conn) -> summary dict`
+- [x] Updated CLI runner to support both daily_prices and quarterly_13f
+**Function**:
+- [x] Complete pipeline: fetch 13F → normalize → validate → store → track
+- [x] Holdings metrics calculation (concentration, top positions, total value)
+- [x] Support for both entity name and CIK lookup
+- [x] Idempotent execution using existing scraper
 **Tests**: Integration test; assert PK uniqueness (cik, cusip, as_of) and proper runs logging.
 **Commit**: `feat(data): T8 quarterly_13f DAG + integration test`
 

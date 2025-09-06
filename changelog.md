@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 2024-12-19
 
+#### T8: Quarterly 13F DAG (Phase 2 Complete!)
+- Implemented complete quarterly_13f pipeline orchestration (fetch → normalize → validate → store)
+- Added Quarterly13FConfig with quarter-end validation and entity/CIK support
+- Built holdings metrics calculation (concentration, top positions, portfolio analysis)
+- Enhanced CLI runner to support both daily_prices and quarterly_13f pipelines
+- Uses existing data_extraction.py scraper via stable adapter interface
+- All operations tested with mocked 13F adapter (8 test cases) - fully integrated
+
 #### T7: Daily Prices DAG (First Human-Visible Product!)
 - Implemented complete daily_prices pipeline orchestration (fetch → normalize → validate → store)
 - Added DailyPricesConfig with smart defaults (365 days lookback)

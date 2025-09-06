@@ -39,18 +39,30 @@ def fetch_prices_window(ticker: str, start: date, end: date) -> List[Dict[str, A
         yf_end = end + timedelta(days=1)
         
         # Fetch data from yfinance
-        # No progress bar or error display for clean logs
+        # No progress bar for clean logs
         data = yf.download(
             ticker,
             start=start.isoformat(),
             end=yf_end.isoformat(),
-            progress=False,
-            show_errors=False
+            progress=False
         )
         
-        # Handle empty response
-        if data.empty:
-            return []
+        # Handle empty response - check multiple ways due to yfinance API changes
+        try:
+            if data is None or (hasattr(data, 'empty') and data.empty) or len(data) == 0:
+                return []
+        except (ValueError, TypeError):
+            # If checking data.empty fails, try len() check
+            try:
+                if len(data) == 0:
+                    return []
+            except:
+                return []
+        
+        # Handle multi-level columns (when yfinance returns ticker-specific columns)
+        if isinstance(data.columns, pd.MultiIndex):
+            # Flatten multi-level columns - take the first level (field names)
+            data.columns = data.columns.get_level_values(0)
         
         # Convert to list of dictionaries
         # Keep yfinance field names - normalization happens later
