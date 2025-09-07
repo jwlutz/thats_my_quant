@@ -350,13 +350,33 @@
 - [ ] Fixtures → success; over/under-length cases → retry once then truncate/decline per policy
 **Commit**: `feat(langchain): LC1 exec-summary chain with structured parser`
 
-#### LC2 — Number/Date Audit Runnable (pure)
+#### LC2 — Number/Date Audit Runnable (pure) 
 **Goal**: Wrap LC1 output with an audit that extracts numbers/dates and ensures they are a subset of `audit_index`.
-**Acceptance**:
-- [ ] Tolerance for percent formatting (e.g., 28.5% vs 28.50%)
-- [ ] Fallback to skeleton if audit fails twice; log warn
-**Tests**:
-- [ ] Positive/negative cases; tolerance edges
+
+**Acceptance Criteria (Go/No-Go)**:
+- [ ] **Extraction Rules (Deterministic)**:
+  - [ ] Percentages: `r'[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s?%'`
+  - [ ] Dates: `r'(January|February|...|December)\s+\d{1,2},\s+\d{4}'` (strict Month D, YYYY)
+  - [ ] Numbers: Only audit percentages and dates (no plain decimals unless explicitly allowed)
+- [ ] **Normalization for Compare**:
+  - [ ] Percent tokens → float: strip %, remove thousands separators, parse to float
+  - [ ] Tolerance: ±0.05 percentage points (abs(model−source) ≤ 0.0005)
+  - [ ] Dates: parse with dateutil to YYYY-MM-DD and check set membership
+- [ ] **audit_index Enhancement**:
+  - [ ] `numeric_percents`: raw floats (e.g., 0.285, -0.185, 0.37)
+  - [ ] `dates_iso`: YYYY-MM-DD format for comparison
+- [ ] **Algorithm**: extract → normalize → compare
+  - [ ] If all tokens ∈ allowed sets (within tolerance) → pass
+  - [ ] Else: retry once (same skeleton, same prompts)
+  - [ ] If still failing → fallback to skeleton and log WARN with offending tokens
+- [ ] **Edge Cases Tested**:
+  - [ ] Negative percent -18.5% survives; -0.0% normalized to 0.0%
+  - [ ] Multiple identical numbers in text are ok
+  - [ ] Dates with leading zeros (August 05, 2025) normalized and pass
+  - [ ] Smart quotes vs straight quotes don't affect audit
+- [ ] **Performance**: Fast execution (no NLP heuristics, pure regex + numeric comparison)
+
+**Tests**: Positive/negative cases; tolerance edges; all edge cases above
 **Commit**: `feat(langchain): LC2 numeric/date audit + fallback`
 
 #### LC3 — Risks Bullets Chain (LCEL)

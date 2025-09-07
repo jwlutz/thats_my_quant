@@ -30,6 +30,7 @@ This document tracks the rationale behind architectural and implementation decis
 **Status**: LC0 COMPLETED - Dependencies added, environment guard implemented with comprehensive tests
 **Status**: LC1 COMPLETED - Executive summary chain with LCEL, structured parser (120-180 words), and risk bullets chain implemented with comprehensive test coverage
 **Status**: LC1 REFINEMENTS COMPLETED - Added deterministic model params (temp=0), max 1 retry policy, restricted quote cleaning, regex sentence truncation, and comprehensive logging
+**Status**: LC2 COMPLETED - Number/date audit system with regex extraction, tolerance-based validation (±0.05pp), fallback to skeleton, and comprehensive integration with both exec summary and risk bullets chains
 
 **Links**: Related to ADR-0003 Enhanced MetricsJSON strategy
 

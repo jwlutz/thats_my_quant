@@ -14,6 +14,7 @@ from langchain_ollama import OllamaLLM
 
 from reports.langchain_setup import ensure_langchain_ready
 from reports.skeleton_builder import build_exec_summary_skeleton
+from reports.number_date_audit import audit_with_fallback
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -286,13 +287,23 @@ def generate_exec_summary(
     last_error = None
     for attempt in range(max_retries + 1):
         try:
-            result = chain.invoke({
+            llm_result = chain.invoke({
                 "skeleton": skeleton,
                 "min_words": chain_kwargs.get("min_words", 120),
                 "max_words": chain_kwargs.get("max_words", 180)
             })
-            logger.info(f"Exec summary generated successfully: attempt={attempt+1}, output_words={len(result.split())}")
-            return result
+            
+            # Audit the result for unauthorized numbers/dates
+            audited_result, used_fallback = audit_with_fallback(
+                llm_result, skeleton, metrics_v2, tolerance=0.0005
+            )
+            
+            if used_fallback:
+                logger.info(f"Exec summary audit failed, used fallback: attempt={attempt+1}")
+            else:
+                logger.info(f"Exec summary generated and audited successfully: attempt={attempt+1}, output_words={len(audited_result.split())}")
+            
+            return audited_result
         except Exception as e:
             last_error = e
             logger.warning(f"Exec summary attempt {attempt+1} failed: {e}")
@@ -340,13 +351,31 @@ def generate_risk_bullets(
     last_error = None
     for attempt in range(max_retries + 1):
         try:
-            result = chain.invoke({
+            llm_result = chain.invoke({
                 "metrics_json": metrics_json,
                 "min_bullets": chain_kwargs.get("min_bullets", 3),
                 "max_bullets": chain_kwargs.get("max_bullets", 5)
             })
-            logger.info(f"Risk bullets generated successfully: attempt={attempt+1}, bullets_count={len(result)}")
-            return result
+            
+            # Audit each bullet for unauthorized numbers/dates
+            audited_bullets = []
+            any_fallback_used = False
+            
+            for i, bullet in enumerate(llm_result):
+                fallback_bullet = f"Risk factor {i+1} based on observed market conditions"
+                audited_bullet, used_fallback = audit_with_fallback(
+                    bullet, fallback_bullet, metrics_v2, tolerance=0.0005
+                )
+                audited_bullets.append(audited_bullet)
+                if used_fallback:
+                    any_fallback_used = True
+            
+            if any_fallback_used:
+                logger.info(f"Risk bullets audit failed for some bullets, used fallback: attempt={attempt+1}")
+            else:
+                logger.info(f"Risk bullets generated and audited successfully: attempt={attempt+1}, bullets_count={len(audited_bullets)}")
+            
+            return audited_bullets
         except Exception as e:
             last_error = e
             logger.warning(f"Risk bullets attempt {attempt+1} failed: {e}")

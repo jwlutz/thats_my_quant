@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Parser Framework**: Pydantic-based parsers with configurable limits, retry logic, and fallback to deterministic skeletons
 - **LC1 Deterministic Refinements**: Temperature=0, top_p=1, repeat_penalty=1, max 1 retry policy, restricted quote cleaning (outermost only)
 - **LC1 Logging & Observability**: Model params, prompt hashes, attempt counts, fallback tracking with local logging
+- **LC2 Number/Date Audit System**: Deterministic regex extraction (percentages, dates), tolerance-based validation (±0.05 percentage points)
+- **LC2 Audit Integration**: Seamless integration with both exec summary and risk bullets chains, automatic fallback to skeleton on violations
+- **LC2 Enhanced audit_index**: Added numeric_percents and dates_iso for efficient comparison, comprehensive edge case handling
 
 ### Added - 2025-09-06
 
