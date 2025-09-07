@@ -201,6 +201,199 @@ CREATE TABLE news_sentiment (
 }
 ```
 
+### insider_trading
+
+Stores SEC Form 4 insider trading transactions.
+
+```sql
+CREATE TABLE insider_trading (
+    form_id TEXT PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    company_name TEXT NOT NULL,
+    insider_name TEXT NOT NULL,
+    insider_title TEXT,
+    transaction_date DATE NOT NULL,
+    transaction_type TEXT NOT NULL, -- 'buy', 'sell', 'grant', 'exercise'
+    shares REAL NOT NULL,
+    price_per_share REAL,
+    total_value REAL,
+    shares_owned_after REAL,
+    filing_date DATE NOT NULL,
+    source TEXT NOT NULL DEFAULT 'sec_edgar',
+    fetched_at DATETIME NOT NULL
+);
+```
+
+**Canonical Row Shape (Python dict)**:
+```python
+{
+    'form_id': str,        # SEC filing identifier
+    'ticker': str,         # Stock ticker
+    'company_name': str,   # Company name
+    'insider_name': str,   # Name of insider
+    'insider_title': str|None,  # Title/position
+    'transaction_date': date,    # Date of transaction
+    'transaction_type': str,     # 'buy', 'sell', 'grant', 'exercise'
+    'shares': float,       # Number of shares
+    'price_per_share': float|None,  # Price per share
+    'total_value': float|None,      # Total transaction value
+    'shares_owned_after': float|None,  # Shares owned after transaction
+    'filing_date': date,   # Date of SEC filing
+    'source': str,         # Data source
+    'fetched_at': datetime,  # When we fetched it
+}
+```
+
+### public_sentiment
+
+Stores public sentiment data from Reddit and X (Twitter).
+
+```sql
+CREATE TABLE public_sentiment (
+    id TEXT PRIMARY KEY,
+    platform TEXT NOT NULL CHECK(platform IN('reddit','x')),
+    post_id TEXT NOT NULL,
+    ticker TEXT NOT NULL,
+    author TEXT,
+    posted_at DATETIME NOT NULL,
+    content TEXT NOT NULL,
+    engagement_score REAL, -- upvotes, likes, etc.
+    permalink TEXT,
+    subreddit TEXT, -- For Reddit posts
+    sentiment_label TEXT CHECK(sentiment_label IN('pos','neu','neg')),
+    sentiment_score REAL,
+    sentiment_confidence REAL,
+    fetched_at DATETIME NOT NULL,
+    UNIQUE(platform, post_id)
+);
+```
+
+**Canonical Row Shape (Python dict)**:
+```python
+{
+    'id': str,             # UUID for public sentiment record
+    'platform': str,       # 'reddit' or 'x'
+    'post_id': str,        # Platform-specific post ID
+    'ticker': str,         # Stock ticker
+    'author': str|None,    # Username/handle
+    'posted_at': datetime, # When posted
+    'content': str,        # Post content
+    'engagement_score': float|None,  # Upvotes, likes, etc.
+    'permalink': str|None, # Link to original post
+    'subreddit': str|None, # For Reddit posts
+    'sentiment_label': str|None,     # 'pos', 'neu', 'neg'
+    'sentiment_score': float|None,   # -1.0 to +1.0
+    'sentiment_confidence': float|None,  # 0.0 to 1.0
+    'fetched_at': datetime,          # When we fetched it
+}
+```
+
+### context_events
+
+Stores market context events for abnormality scoring adjustments.
+
+```sql
+CREATE TABLE context_events (
+    id TEXT PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    event_type TEXT NOT NULL CHECK(event_type IN('earnings','dividend_ex','earnings_call','sector_event')),
+    event_date DATE NOT NULL,
+    event_time DATETIME,
+    description TEXT,
+    source TEXT NOT NULL,
+    metadata JSON, -- Additional event-specific data
+    created_at DATETIME NOT NULL,
+    UNIQUE(ticker, event_type, event_date)
+);
+```
+
+**Canonical Row Shape (Python dict)**:
+```python
+{
+    'id': str,             # UUID for context event
+    'ticker': str,         # Stock ticker
+    'event_type': str,     # 'earnings', 'dividend_ex', 'earnings_call', 'sector_event'
+    'event_date': date,    # Date of event
+    'event_time': datetime|None,  # Specific time if available
+    'description': str|None,      # Event description
+    'source': str,         # Data source
+    'metadata': dict|None, # Additional event data
+    'created_at': datetime,       # When we recorded it
+}
+```
+
+### abnormality_baselines
+
+Stores rolling baseline statistics for abnormality detection.
+
+```sql
+CREATE TABLE abnormality_baselines (
+    id TEXT PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    metric_type TEXT NOT NULL, -- 'search_volume', 'insider_volume', 'news_volume', etc.
+    timeframe_days INTEGER NOT NULL, -- 7, 30, 90
+    baseline_date DATE NOT NULL,
+    mean_value REAL NOT NULL,
+    std_value REAL NOT NULL,
+    percentiles JSON NOT NULL, -- P10, P25, P50, P75, P90, P95, P99
+    data_points INTEGER NOT NULL,
+    computed_at DATETIME NOT NULL,
+    UNIQUE(ticker, metric_type, timeframe_days, baseline_date)
+);
+```
+
+**Canonical Row Shape (Python dict)**:
+```python
+{
+    'id': str,             # UUID for baseline record
+    'ticker': str,         # Stock ticker
+    'metric_type': str,    # Type of metric ('search_volume', 'insider_volume', etc.)
+    'timeframe_days': int, # Timeframe (7, 30, 90)
+    'baseline_date': date, # Date baseline was calculated for
+    'mean_value': float,   # Mean of baseline period
+    'std_value': float,    # Standard deviation
+    'percentiles': dict,   # P10, P25, P50, P75, P90, P95, P99
+    'data_points': int,    # Number of data points in baseline
+    'computed_at': datetime,  # When baseline was computed
+}
+```
+
+### google_trends
+
+Stores Google Trends search interest data for tickers.
+
+```sql
+CREATE TABLE google_trends (
+    id TEXT PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    search_term TEXT NOT NULL,
+    date DATE NOT NULL,
+    search_volume INTEGER NOT NULL, -- 0-100 relative scale
+    geo TEXT DEFAULT 'US',
+    timeframe TEXT NOT NULL, -- e.g., 'today 7-d', 'today 1-m'
+    related_queries JSON,
+    rising_queries JSON,
+    fetched_at DATETIME NOT NULL,
+    UNIQUE(ticker, search_term, date, geo, timeframe)
+);
+```
+
+**Canonical Row Shape (Python dict)**:
+```python
+{
+    'id': str,             # UUID for trends record
+    'ticker': str,         # Stock ticker
+    'search_term': str,    # Search term used (ticker or company name)
+    'date': date,          # Date of search interest
+    'search_volume': int,  # Google Trends volume (0-100)
+    'geo': str,            # Geographic region (default: 'US')
+    'timeframe': str,      # Timeframe used for query
+    'related_queries': dict|None,  # JSON: related search queries
+    'rising_queries': dict|None,   # JSON: rising search queries  
+    'fetched_at': datetime,        # When we fetched it
+}
+```
+
 ### sentiment_snapshot
 
 Stores aggregated sentiment metrics for tickers over time windows.
@@ -211,25 +404,58 @@ CREATE TABLE sentiment_snapshot (
     as_of DATE NOT NULL,
     window_days INTEGER NOT NULL,
     
-    -- News sentiment
-    news_count INTEGER NOT NULL DEFAULT 0,
-    news_avg_score REAL,
-    news_pos_pct REAL,
-    news_neu_pct REAL,
-    news_neg_pct REAL,
-    news_confidence REAL,
+    -- Multi-timeframe abnormality scores (7d, 30d, 90d)
+    abnormality_score_7d REAL,
+    abnormality_score_30d REAL,
+    abnormality_score_90d REAL,
+    abnormality_percentile_7d REAL,
+    abnormality_percentile_30d REAL,
+    abnormality_percentile_90d REAL,
+    abnormality_classification TEXT CHECK(abnormality_classification IN('normal','unusual','extreme')),
     
-    -- Institutional sentiment (from 13F deltas)
-    inst_score REAL,
-    inst_confidence REAL,
+    -- Component abnormality scores
+    institutional_abnormality REAL,
+    institutional_percentile REAL,
+    institutional_classification TEXT,
     
-    -- Composite sentiment
-    composite_score REAL NOT NULL,
+    insider_abnormality REAL,
+    insider_percentile REAL,
+    insider_classification TEXT,
+    insider_transaction_count INTEGER DEFAULT 0,
+    insider_net_value REAL,
+    
+    news_abnormality REAL,
+    news_percentile REAL,
+    news_classification TEXT,
+    news_count INTEGER DEFAULT 0,
+    news_avg_sentiment REAL,
+    
+    search_abnormality REAL,
+    search_percentile REAL,
+    search_classification TEXT,
+    search_volume_current INTEGER,
+    search_volume_baseline REAL,
+    
+    public_abnormality REAL,
+    public_percentile REAL,
+    public_classification TEXT,
+    public_mention_count INTEGER DEFAULT 0,
+    public_avg_sentiment REAL,
+    
+    -- Composite abnormality (weighted across timeframes and components)
+    composite_abnormality REAL NOT NULL,
+    composite_percentile REAL NOT NULL,
+    composite_classification TEXT NOT NULL,
     composite_confidence REAL NOT NULL,
     
-    -- Metadata
+    -- Context adjustments
+    context_events JSON, -- Active context events affecting scoring
+    context_adjustment_factor REAL DEFAULT 1.0,
+    
+    -- Catalysts and metadata
     catalysts JSON,
     data_quality JSON,
+    baseline_sufficiency JSON, -- Which baselines have sufficient data
     computed_at DATETIME NOT NULL,
     
     PRIMARY KEY(ticker, as_of, window_days)
@@ -310,6 +536,11 @@ This allows full traceability and reproducibility of all data.
 - **news_raw**: `url_hash` - One entry per unique URL
 - **news_clean**: `id` - UUID for each processed news item
 - **news_sentiment**: `id` - UUID for each sentiment analysis
+- **insider_trading**: `form_id` - One entry per SEC filing
+- **public_sentiment**: `id` - UUID with unique constraint on (platform, post_id)
+- **context_events**: `id` - UUID with unique constraint on (ticker, event_type, event_date)
+- **abnormality_baselines**: `id` - UUID with unique constraint on (ticker, metric_type, timeframe_days, baseline_date)
+- **google_trends**: `id` - UUID with unique constraint on (ticker, search_term, date, geo, timeframe)
 - **sentiment_snapshot**: `(ticker, as_of, window_days)` - One snapshot per ticker per date per window
 - **runs**: `run_id` - Auto-incrementing identifier
 

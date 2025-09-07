@@ -67,6 +67,34 @@ This document tracks the rationale behind architectural and implementation decis
 **Status**: SNT0 COMPLETED - ADR-0005 created, schemas defined, ready for implementation
 **Status**: SNT1 COMPLETED - RSS ingestion pipeline with conditional gets (ETag/Last-Modified), near-duplicate detection (rapidfuzz), ticker hint extraction, relevance filtering, and comprehensive validation
 
+## 2025-01-XX - Enhanced Sentiment Architecture (SNT1B/SNT1C)
+
+**Goal**: Enhance sentiment analysis with Google Trends and insider trading data for comprehensive sentiment coverage
+
+**Options Considered**:
+1. News-only sentiment (current SNT1 implementation)
+2. Add Google Trends for retail sentiment signals
+3. Add insider trading (SEC Form 4) for insider sentiment signals
+4. Add both Google Trends and insider trading ✅
+
+**Decision**: Option 4 - Add both Google Trends and insider trading to create comprehensive 5-source sentiment analysis
+
+**Reasoning**:
+- Google Trends search interest often precedes price movements (retail sentiment leading indicator)
+- Insider trading (Form 4 filings) provides strongest signal of insider confidence/concern
+- Combined with existing institutional (13F deltas) and news sentiment creates comprehensive coverage
+- Both sources are available locally without external API dependencies (pytrends, SEC EDGAR)
+- Maintains local-first architecture while significantly enhancing sentiment signal quality
+
+**Implementation Notes**:
+- SNT1B: pytrends library for Google Trends data with rate limiting and caching
+- SNT1C: SEC Form 4 scraping using existing EDGAR infrastructure with transaction pattern analysis
+- Enhanced sentiment_snapshot schema with search_score, insider_score components
+- Weighted composite scoring: institutional (30%), insider (25%), news (25%), search (20%)
+- All sources optional and can be enabled/disabled independently
+
+**Status**: ARCHITECTURE UPDATED - Ready to implement SNT1B (Google Trends) and SNT1C (insider trading)
+
 **Links**: Related to ADR-0005 Sentiment Analysis Architecture
 
 ---

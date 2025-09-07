@@ -411,84 +411,124 @@
 - [ ] Integration with v2 MetricsJSON schema
 **Commit**: `feat(sentiment): SNT0 architecture decision record`
 
-#### SNT1 — RSS News Ingestion
+#### SNT1 — RSS News Ingestion ✅
 **Goal**: Ingest news from RSS feeds for ticker-specific sentiment
 **Functions**:
-- [ ] `fetch_rss_news(ticker, days=7)` - RSS feed aggregation
-- [ ] `parse_news_items()` - extract title, content, date, source
-- [ ] RSS source configuration in `config/rss_sources.yml`
+- [x] `fetch_rss_news(ticker, days=7)` - RSS feed aggregation
+- [x] `parse_news_items()` - extract title, content, date, source
+- [x] RSS source configuration in `config/rss_sources.yml`
+- [x] Conditional gets (ETag/Last-Modified), near-duplicate detection, relevance filtering
 **Tests**:
-- [ ] Mock RSS responses; parse various feed formats
+- [x] 32 comprehensive tests covering all RSS ingestion functionality
 **Commit**: `feat(sentiment): SNT1 RSS news ingestion pipeline`
 
-#### SNT2 — Optional News Providers (OpenBB/NewsAPI)
-**Goal**: Optional integration with external news APIs
+#### SNT1B — Google Trends Integration
+**Goal**: Integrate Google Trends search interest data for retail sentiment
 **Functions**:
-- [ ] `fetch_openbb_news()` - OpenBB integration
-- [ ] `fetch_newsapi_news()` - NewsAPI integration
-- [ ] Provider fallback chain with rate limiting
+- [ ] `fetch_trends_data(ticker, timeframe='today 7-d')` - pytrends integration
+- [ ] `normalize_search_volume()` - relative volume scoring
+- [ ] `detect_search_spikes()` - unusual interest detection
 **Tests**:
-- [ ] Mocked provider responses; credential validation
-**Commit**: `feat(sentiment): SNT2 optional news providers`
+- [ ] Mock pytrends responses; validate volume normalization
+**Commit**: `feat(sentiment): SNT1B Google Trends integration`
 
-#### SNT3 — News Normalization & Storage
-**Goal**: Normalize news from all sources and store in SQLite
-**Schema**: `news` table with ticker, title, content, source, published_date, sentiment_score
+#### SNT1C — Insider Trading Integration (SEC Form 4)
+**Goal**: Integrate SEC Form 4 insider trading data for insider sentiment
 **Functions**:
-- [ ] `normalize_news_item()` - canonical format
-- [ ] `upsert_news()` - idempotent storage
+- [ ] `fetch_form4_filings(ticker, days=90)` - SEC EDGAR Form 4 scraping
+- [ ] `calculate_insider_sentiment()` - net buying/selling sentiment
+- [ ] `detect_insider_patterns()` - unusual trading patterns
 **Tests**:
-- [ ] Schema validation; deduplication logic
-**Commit**: `feat(sentiment): SNT3 news normalization & storage`
+- [ ] Mock SEC responses; validate transaction parsing
+**Commit**: `feat(sentiment): SNT1C insider trading integration`
 
-#### SNT4 — Local Sentiment Classification
-**Goal**: Local FinBERT model for financial sentiment scoring
+#### SNT1D — Public Sentiment Integration (Core)
+**Goal**: Integrate Reddit and X (Twitter) APIs for public sentiment (core functionality)
+**Functions**:
+- [ ] `fetch_reddit_mentions(ticker, subreddits)` - PRAW integration
+- [ ] `fetch_x_mentions(ticker)` - tweepy integration with $TICKER search
+- [ ] `validate_public_posts()` - engagement filtering and spam detection
+**Tests**:
+- [ ] Mock API responses; validate post processing and sentiment scoring
+**Commit**: `feat(sentiment): SNT1D public sentiment integration`
+
+#### SNT2 — Baseline Management & Abnormality Engine
+**Goal**: Rolling baseline calculation and abnormality detection across 7/30/90-day timeframes
+**Functions**:
+- [ ] `calculate_rolling_baselines(ticker, metric_type)` - statistical baseline calculation
+- [ ] `detect_abnormality(current_value, baseline, timeframes)` - Z-score + percentile scoring
+- [ ] `classify_abnormality(score)` - normal/unusual/extreme classification
+- [ ] `update_baselines_daily()` - automated baseline maintenance
+**Tests**:
+- [ ] Statistical accuracy; edge cases; multi-timeframe weighting
+**Commit**: `feat(sentiment): SNT2 abnormality detection engine`
+
+#### SNT3 — Context Awareness Integration
+**Goal**: Context-aware abnormality scoring with earnings, dividends, and earnings calls
+**Functions**:
+- [ ] `fetch_earnings_calendar(ticker)` - yfinance earnings dates
+- [ ] `fetch_dividend_calendar(ticker)` - dividend ex-dates and schedules
+- [ ] `detect_earnings_calls(ticker)` - SEC 8-K filings + transcript detection
+- [ ] `apply_context_adjustments(abnormality_score, context)` - threshold adjustments
+**Tests**:
+- [ ] Context detection accuracy; threshold adjustment validation
+**Commit**: `feat(sentiment): SNT3 context-aware scoring`
+
+#### SNT4 — Data Storage & Normalization
+**Goal**: Normalize and store all sentiment data sources in SQLite
+**Functions**:
+- [ ] `upsert_news_items()` - idempotent news storage
+- [ ] `upsert_insider_transactions()` - Form 4 transaction storage
+- [ ] `upsert_trends_data()` - Google Trends storage
+- [ ] `upsert_public_posts()` - Reddit/X post storage
+- [ ] `upsert_context_events()` - earnings/dividend event storage
+**Tests**:
+- [ ] Schema validation; deduplication logic; idempotent operations
+**Commit**: `feat(sentiment): SNT4 data storage & normalization`
+
+#### SNT5 — Local Sentiment Classification
+**Goal**: Local FinBERT model for financial sentiment scoring across all text sources
 **Functions**:
 - [ ] `classify_sentiment(text)` - FinBERT inference
-- [ ] `batch_classify_news()` - efficient batch processing
-- [ ] Model download and caching
+- [ ] `batch_classify_all_sources()` - efficient batch processing for news/public posts
+- [ ] Model download and caching with fallback to simple keyword scoring
 **Tests**:
-- [ ] Known financial text → expected sentiment scores
-**Commit**: `feat(sentiment): SNT4 local sentiment classifier`
+- [ ] Known financial text → expected sentiment scores; batch processing performance
+**Commit**: `feat(sentiment): SNT5 local sentiment classifier`
 
-#### SNT5 — Sentiment Aggregation
-**Goal**: Aggregate news sentiment into ticker-level metrics
+#### SNT6 — Abnormality Aggregation Engine
+**Goal**: Aggregate all sources into multi-timeframe abnormality scores
 **Functions**:
-- [ ] `aggregate_sentiment_metrics(ticker, days=7)` - time-weighted scoring
-- [ ] `sentiment_trend_analysis()` - trend detection
-- [ ] Integration with existing MetricsJSON
+- [ ] `calculate_composite_abnormality(ticker, timeframes=[7,30,90])` - weighted abnormality scoring
+- [ ] `generate_catalyst_alerts(abnormality_data)` - unusual pattern detection
+- [ ] `update_sentiment_snapshots()` - daily snapshot generation
 **Tests**:
-- [ ] Synthetic news data → expected aggregations
-**Commit**: `feat(sentiment): SNT5 sentiment aggregation metrics`
+- [ ] Multi-timeframe weighting; catalyst detection; composite scoring accuracy
+**Commit**: `feat(sentiment): SNT6 abnormality aggregation engine`
 
-#### SNT6 — Report Section Integration
-**Goal**: Add sentiment section to reports with LLM narrative
+#### SNT7 — Report Integration & LLM Narratives
+**Goal**: Add sentiment section to reports with abnormality-focused LLM narrative
 **Features**:
-- [ ] Sentiment metrics in v2 MetricsJSON
-- [ ] LangChain chain for sentiment narrative
-- [ ] Integration with existing report generation
+- [ ] Enhanced MetricsJSON v2 sentiment section with abnormality metrics
+- [ ] LangChain chain for abnormality narrative generation
+- [ ] Integration with existing audit system (no hallucinated abnormality scores)
 **Tests**:
-- [ ] End-to-end report with sentiment section
-**Commit**: `feat(sentiment): SNT6 report integration`
+- [ ] End-to-end report with sentiment section; audit validation
+**Commit**: `feat(sentiment): SNT7 report integration & narratives`
 
-#### SNT7 — CLI Commands
-**Goal**: Human-visible sentiment commands
+#### SNT8 — CLI Commands & Performance
+**Goal**: Human-visible sentiment commands with performance optimization
 **Commands**:
-- [ ] `sentiment TICKER --days=7` - show sentiment metrics
-- [ ] `news TICKER --days=7` - show recent news items
-**Tests**:
-- [ ] CLI e2e with mocked data
-**Commit**: `feat(sentiment): SNT7 CLI commands`
-
-#### SNT8 — Caching & Performance
-**Goal**: Optimize sentiment pipeline performance
+- [ ] `sentiment TICKER --timeframes=7,30,90` - show abnormality analysis
+- [ ] `catalysts TICKER --days=7` - show detected unusual patterns
+- [ ] `baselines TICKER --update` - force baseline recalculation
 **Features**:
-- [ ] News item caching with TTL
-- [ ] Batch sentiment processing
-- [ ] Rate limiting for external APIs
+- [ ] Baseline caching and incremental updates
+- [ ] Rate limiting for all external APIs
+- [ ] Performance monitoring and optimization
 **Tests**:
-- [ ] Performance benchmarks; cache hit rates
-**Commit**: `feat(sentiment): SNT8 caching & performance`
+- [ ] CLI e2e with real data; performance benchmarks; cache hit rates
+**Commit**: `feat(sentiment): SNT8 CLI commands & performance`
 
 ### Phase 5: Advanced Features (Future)
 **Potential Enhancements:**
