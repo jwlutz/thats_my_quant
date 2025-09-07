@@ -38,6 +38,39 @@ This document tracks the rationale behind architectural and implementation decis
 
 ---
 
+## 2025-01-XX - Sentiment Analysis Architecture (SNT0)
+
+**Goal**: Define sentiment analysis architecture with multi-source local-first approach
+
+**Options Considered**:
+1. News-only sentiment (RSS + FinBERT)
+2. External sentiment APIs (NewsAPI, Alpha Vantage)
+3. Multi-source local-first approach (institutional + news + optional public) ✅
+
+**Decision**: Option 3 - Multi-source local-first sentiment analysis
+
+**Reasoning**:
+- Institutional sentiment (13F deltas) provides strongest signal for equity movements
+- RSS news sentiment adds market narrative context without external dependencies
+- Optional public sentiment (Reddit/X) behind flags for users who want comprehensive coverage
+- Local FinBERT classification maintains our no-external-dependency principle
+- Deterministic aggregation algorithm ensures auditability and reproducibility
+
+**Implementation Notes**:
+- RSS-first strategy with conditional gets (ETag/Last-Modified) for efficiency
+- Local FinBERT model for financial sentiment classification (no cloud APIs)
+- Strict relevance filtering (ticker mention + financial keywords)
+- Near-duplicate detection with rapidfuzz to prevent spam/duplicate signal
+- Optional features behind environment flags (Reddit/X require credentials)
+- Integration with Enhanced MetricsJSON v2 and existing audit system
+
+**Status**: SNT0 COMPLETED - ADR-0005 created, schemas defined, ready for implementation
+**Status**: SNT1 COMPLETED - RSS ingestion pipeline with conditional gets (ETag/Last-Modified), near-duplicate detection (rapidfuzz), ticker hint extraction, relevance filtering, and comprehensive validation
+
+**Links**: Related to ADR-0005 Sentiment Analysis Architecture
+
+---
+
 *Template for future entries*:
 ## YYYY-MM-DD - Decision Title (Ticket ID)
 **Goal**: What we're trying to achieve

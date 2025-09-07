@@ -43,3 +43,8 @@ types-beautifulsoup4>=4.12.0
 # LangChain (minimal - polish-only chains)
 langchain-core>=0.1.0,<1.0.0
 langchain-ollama>=0.1.0,<1.0.0
+
+# Sentiment Analysis (local-first)
+feedparser>=6.0.0,<7.0.0  # RSS parsing
+rapidfuzz>=3.0.0,<4.0.0   # Near-duplicate detection
+python-dateutil>=2.8.0,<3.0.0  # Date parsing

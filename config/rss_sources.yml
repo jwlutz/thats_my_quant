@@ -1,0 +1,86 @@
+# RSS News Sources Configuration
+# High-quality financial news sources for sentiment analysis
+
+sources:
+  # Reuters Business News
+  reuters_business:
+    url: "https://feeds.reuters.com/reuters/businessNews"
+    name: "Reuters Business"
+    enabled: true
+    priority: high
+    update_frequency: 30  # minutes
+    
+  # MarketWatch
+  marketwatch_headlines:
+    url: "https://feeds.marketwatch.com/marketwatch/topstories/"
+    name: "MarketWatch Top Stories"
+    enabled: true
+    priority: high
+    update_frequency: 30
+    
+  # Yahoo Finance News
+  yahoo_finance:
+    url: "https://feeds.finance.yahoo.com/rss/2.0/headline"
+    name: "Yahoo Finance Headlines"
+    enabled: true
+    priority: medium
+    update_frequency: 60
+    
+  # Seeking Alpha (if available)
+  seeking_alpha:
+    url: "https://seekingalpha.com/feed.xml"
+    name: "Seeking Alpha"
+    enabled: false  # May require verification
+    priority: medium
+    update_frequency: 60
+    
+  # Financial Times (if available)
+  ft_companies:
+    url: "https://www.ft.com/companies?format=rss"
+    name: "Financial Times Companies"
+    enabled: false  # May require subscription
+    priority: high
+    update_frequency: 60
+
+# Global settings
+settings:
+  user_agent: "ai-research-workbench/1.0"
+  request_timeout: 30
+  max_items_per_feed: 50
+  respect_robots_txt: true
+  honor_conditional_gets: true
+  
+# Ticker relevance keywords
+relevance_keywords:
+  financial_terms:
+    - "earnings"
+    - "revenue" 
+    - "guidance"
+    - "acquisition"
+    - "merger"
+    - "dividend"
+    - "buyback"
+    - "split"
+    - "ipo"
+    - "sec filing"
+    - "analyst"
+    - "upgrade"
+    - "downgrade"
+    - "price target"
+    - "quarterly"
+    - "annual"
+    - "results"
+    
+  exclusion_terms:
+    - "obituary"
+    - "sports"
+    - "weather"
+    - "entertainment"
+    - "celebrity"
+
+# Rate limiting
+rate_limits:
+  requests_per_second: 5
+  burst_limit: 10
+  backoff_multiplier: 2.0
+  max_backoff_seconds: 300
