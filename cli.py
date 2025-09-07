@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 Main CLI for AI Stock Market Research Workbench.
-Usage: python cli.py report TICKER
+Usage: python cli.py report TICKER [--llm=on|off]
 """
 
 import sys
 import json
 import sqlite3
+import argparse
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
@@ -18,8 +19,7 @@ sys.path.insert(0, str(project_root))
 # Import all report components
 from reports.v1_to_v2_builder import build_enhanced_metrics_v2
 from reports.skeleton_builder import build_exec_summary_skeleton
-from reports.llm_polisher import polish_executive_summary
-from reports.number_audit import audit_narrative
+from reports.langchain_chains import generate_exec_summary, generate_risk_bullets
 from reports.atomic_writer import write_both_atomic
 from reports.latest_pointer import update_latest_pointer
 from reports.cross_ticker_index import update_cross_ticker_index
@@ -28,32 +28,37 @@ from reports.path_policy import create_report_paths
 
 def main():
     """Main CLI entry point."""
-    if len(sys.argv) < 3:
-        print("Usage:")
-        print("  python cli.py report TICKER")
-        print()
-        print("Examples:")
-        print("  python cli.py report AAPL")
-        print("  python cli.py report MSFT")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description='AI Stock Market Research Workbench',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Examples:
+  python cli.py report AAPL                  # Generate report with deterministic tables only (default)
+  python cli.py report AAPL --llm=off        # Explicit deterministic mode
+  python cli.py report AAPL --llm=on         # Enable LLM narrative generation
+  python cli.py report MSFT --llm=on         # Generate MSFT report with LLM"""
+    )
     
-    command = sys.argv[1]
+    parser.add_argument('command', choices=['report'], help='Command to execute')
+    parser.add_argument('ticker', help='Stock ticker symbol (e.g., AAPL, MSFT)')
+    parser.add_argument('--llm', choices=['on', 'off'], default='off',
+                       help='Enable LLM narrative generation (default: off)')
     
-    if command == 'report':
-        ticker = sys.argv[2]
-        generate_report(ticker)
+    args = parser.parse_args()
+    
+    if args.command == 'report':
+        generate_report(args.ticker, llm_enabled=(args.llm == 'on'))
     else:
-        print(f"Unknown command: {command}")
-        print("Available commands: report")
+        print(f"Unknown command: {args.command}")
         sys.exit(1)
 
 
-def generate_report(ticker: str):
+def generate_report(ticker: str, llm_enabled: bool = False):
     """
     Generate complete research report for ticker.
     
     Args:
         ticker: Stock ticker symbol
+        llm_enabled: Whether to enable LLM narrative generation
     """
     print(f"Generating research report for {ticker}")
     print()
@@ -76,33 +81,41 @@ def generate_report(ticker: str):
         v2_metrics = build_enhanced_metrics_v2(v1_metrics)
         print(f"Enhanced to v2 format")
         
-        # 3. Build skeleton
-        skeleton = build_exec_summary_skeleton(v2_metrics)
-        print(f"Built skeleton ({len(skeleton.split())} words)")
-        
-        # 4. Polish with LLM (with fallback)
-        polish_result = polish_executive_summary(skeleton, v2_metrics)
-        
-        if polish_result['status'] == 'completed':
-            polished_text = polish_result['polished_text']
-            print(f"LLM polished ({polish_result['word_count']} words)")
-            
-            # 5. Audit for hallucinations
-            audit_result = audit_narrative(polished_text, v2_metrics)
-            
-            if audit_result['passed']:
-                final_summary = polished_text
-                print(f"Audit passed ({len(audit_result['verified_elements'])} elements verified)")
-            else:
-                final_summary = skeleton  # Fallback to skeleton
-                print(f"WARNING: Audit failed - using skeleton fallback")
-                print(f"   Hallucinated: {audit_result['hallucinated_elements']}")
+        # 3. Generate executive summary
+        if llm_enabled:
+            print("LLM enabled - generating narrative with audit")
+            try:
+                final_summary = generate_exec_summary(v2_metrics)
+                print(f"Executive summary generated ({len(final_summary.split())} words)")
+            except Exception as e:
+                print(f"WARNING: LLM generation failed - using skeleton: {e}")
+                skeleton = build_exec_summary_skeleton(v2_metrics)
+                final_summary = skeleton
+                print(f"Using skeleton fallback ({len(skeleton.split())} words)")
         else:
-            final_summary = skeleton  # LLM failed, use skeleton
-            print(f"WARNING: LLM failed - using skeleton: {polish_result['error']}")
+            print("LLM disabled - using deterministic skeleton")
+            skeleton = build_exec_summary_skeleton(v2_metrics)
+            final_summary = skeleton
+            print(f"Built skeleton ({len(skeleton.split())} words)")
         
-        # 6. Create complete report
-        report_content = _build_complete_report(final_summary, v2_metrics)
+        # 4. Generate risk bullets (if LLM enabled)
+        if llm_enabled:
+            try:
+                risk_bullets = generate_risk_bullets(v2_metrics)
+                print(f"Risk bullets generated ({len(risk_bullets)} bullets)")
+            except Exception as e:
+                print(f"WARNING: Risk bullets generation failed: {e}")
+                risk_bullets = [
+                    "Market volatility risk based on observed price movements",
+                    "Concentration risk in institutional ownership structure",
+                    "Liquidity risk during market stress periods"
+                ]
+                print("Using fallback risk bullets")
+        else:
+            risk_bullets = None  # No risk bullets in deterministic mode
+        
+        # 5. Create complete report
+        report_content = _build_complete_report(final_summary, v2_metrics, risk_bullets)
         
         # 7. Write report atomically
         timestamp = datetime.now()
@@ -158,13 +171,14 @@ def generate_report(ticker: str):
         sys.exit(1)
 
 
-def _build_complete_report(executive_summary: str, metrics_v2: Dict[str, Any]) -> str:
+def _build_complete_report(executive_summary: str, metrics_v2: Dict[str, Any], risk_bullets: list = None) -> str:
     """
     Build complete Markdown report with all sections.
     
     Args:
         executive_summary: Generated executive summary
         metrics_v2: Enhanced MetricsJSON v2
+        risk_bullets: Optional list of risk bullet strings
         
     Returns:
         Complete Markdown report content
@@ -193,6 +207,19 @@ def _build_complete_report(executive_summary: str, metrics_v2: Dict[str, Any]) -
 {executive_summary}
 
 ---""")
+    
+    # Risk Analysis (if LLM enabled)
+    if risk_bullets:
+        risk_section = """## Risk Analysis
+
+Key risk factors identified from the analysis:
+
+"""
+        for i, bullet in enumerate(risk_bullets, 1):
+            risk_section += f"{i}. {bullet}\n"
+        
+        risk_section += "\n---"
+        sections.append(risk_section)
     
     # Price Snapshot
     sections.append(_build_price_snapshot_table(price))

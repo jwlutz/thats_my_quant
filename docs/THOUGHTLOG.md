@@ -31,6 +31,8 @@ This document tracks the rationale behind architectural and implementation decis
 **Status**: LC1 COMPLETED - Executive summary chain with LCEL, structured parser (120-180 words), and risk bullets chain implemented with comprehensive test coverage
 **Status**: LC1 REFINEMENTS COMPLETED - Added deterministic model params (temp=0), max 1 retry policy, restricted quote cleaning, regex sentence truncation, and comprehensive logging
 **Status**: LC2 COMPLETED - Number/date audit system with regex extraction, tolerance-based validation (±0.05pp), fallback to skeleton, and comprehensive integration with both exec summary and risk bullets chains
+**Status**: LC3 COMPLETED - Risk bullets chain already integrated with same audit system as exec summary (3-5 bullets, format validation, audit fallback)
+**Status**: LC4 COMPLETED - CLI integration with --llm=on|off switch (default off), argparse support, risk analysis section, graceful LLM failure handling
 
 **Links**: Related to ADR-0003 Enhanced MetricsJSON strategy
 

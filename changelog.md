@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **LC2 Number/Date Audit System**: Deterministic regex extraction (percentages, dates), tolerance-based validation (±0.05 percentage points)
 - **LC2 Audit Integration**: Seamless integration with both exec summary and risk bullets chains, automatic fallback to skeleton on violations
 - **LC2 Enhanced audit_index**: Added numeric_percents and dates_iso for efficient comparison, comprehensive edge case handling
+- **LC3 Risk Bullets Integration**: Risk bullets chain (3-5 bullets) with same audit system as exec summary, format validation, audit fallback
+- **LC4 CLI Integration**: Updated CLI with --llm=on|off switch (default off), argparse support, risk analysis section, graceful LLM failure handling
+- **ADR-0004**: Documented LangChain limited to polish-only integration with strict boundaries and safety guarantees
 
 ### Added - 2025-09-06
 
