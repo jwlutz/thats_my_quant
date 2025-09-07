@@ -1,0 +1,50 @@
+{
+  "ticker": "MSFT",
+  "as_of_date": "2025-09-06",
+  "data_period": {
+    "start_date": "2025-08-07",
+    "end_date": "2025-09-05",
+    "trading_days": 21
+  },
+  "price_metrics": {
+    "returns": {
+      "1D": -0.025533006259296664,
+      "1W": -0.02872618755914713,
+      "1M": null,
+      "3M": null,
+      "6M": null,
+      "1Y": null
+    },
+    "volatility": {
+      "21D_annualized": null,
+      "63D_annualized": null,
+      "252D_annualized": null
+    },
+    "drawdown": {
+      "max_drawdown_pct": -0.063158980583786,
+      "peak_date": "2025-08-12",
+      "trough_date": "2025-09-05",
+      "recovery_date": null,
+      "drawdown_days": "17",
+      "recovery_days": null
+    },
+    "current_price": {
+      "close": 495.0,
+      "date": "2025-09-05"
+    }
+  },
+  "institutional_metrics": null,
+  "data_quality": {
+    "price_coverage_pct": 100.0,
+    "missing_price_days": 0,
+    "latest_13f_quarter": null,
+    "13f_data_age_days": null
+  },
+  "metadata": {
+    "calculated_at": "2025-09-06T20:07:35.057107",
+    "calculation_version": "1.0.0",
+    "data_sources": [
+      "yfinance"
+    ]
+  }
+}

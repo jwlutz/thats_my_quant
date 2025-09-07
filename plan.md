@@ -148,56 +148,344 @@
 **Tests**: Integration test; assert PK uniqueness (cik, cusip, as_of) and proper runs logging.
 **Commit**: `feat(data): T8 quarterly_13f DAG + integration test`
 
-### Phase 3: Analysis Engine
-4. **Metrics Calculator** (2 hours)
-   - [ ] Returns (1D, 1W, 1M, 3M, 6M, 1Y)
-   - [ ] Realized volatility (annualized)
-   - [ ] Maximum drawdown
-   - [ ] 13F concentration metrics
-   - [ ] Data coverage statistics
+### Phase 3: Analysis Engine (TDD Micro-Steps)
 
-### Phase 4: Reporting
-5. **Report Generator** (3 hours)
-   - [ ] Create Markdown template
-   - [ ] Build data-to-table formatters
-   - [ ] Integrate Ollama for narrative
-   - [ ] Add metadata sections
-   - [ ] Implement versioning
+#### A0 — Metrics Contracts & Fixtures (pure, no I/O) ✅
+**Goal**: Define exact JSON shapes for outputs + add tiny golden fixtures.
+**Deliverables**:
+- [x] docs/METRICS.md with field names, units, windows
+- [x] Fixtures: tests/fixtures/prices_aapl_small.csv, tests/fixtures/holdings_13f_tiny.json, expected metrics JSON
+- [x] Tests: schema/shape tests read fixtures and assert expected keys & types (no DB)
+**Commit**: `feat(analysis): A0 metrics contracts & fixtures`
 
-6. **LLM Integration** (2 hours)
-   - [ ] Define prompt contracts
-   - [ ] Build Ollama client
-   - [ ] Create response validator
-   - [ ] Add fallback for LLM failures
-   - [ ] Enforce word limits
+#### A1 — Returns Utilities (pure) ✅
+**Goal**: Calculate simple returns over trading day windows.
+**Functions**:
+- [x] `window_ends(trading_dates, windows=[1,5,21,63,126,252]) -> dict`
+- [x] `simple_returns(series, k) -> float` (and vectorized helper)
+- [x] `calculate_period_returns()` - multi-window calculator
+**Tests**: Deterministic synthetic series where you can hand-verify 1D/1W/etc.
+**Commit**: `feat(analysis): A1 returns utilities`
 
-### Phase 5: Orchestration
-7. **Run Registry** (1 hour)
-   - [ ] Create run tracking
-   - [ ] Status management
-   - [ ] Error logging
-   - [ ] Report path linking
+#### A2 — Log Returns & Realized Volatility (pure) ✅
+**Goal**: Calculate log returns and rolling volatility.
+**Functions**:
+- [x] `log_returns(series) -> np.ndarray`
+- [x] `realized_vol(log_ret, window=21, annualize=252) -> float`
+- [x] `rolling_volatility()` - rolling windows
+- [x] `calculate_volatility_metrics()` - multi-window calculator
+**Tests**: Synthetic series with known std; rolling checks; NaN handling policy explicit.
+**Commit**: `feat(analysis): A2 log returns & volatility`
 
-8. **CLI Interface** (2 hours)
-   - [ ] `run_report TICKER` command
-   - [ ] `list_runs` command
-   - [ ] `latest_report TICKER` command
-   - [ ] Configuration management
-   - [ ] Progress indicators
+#### A3 — Drawdown & Recovery (pure) ✅
+**Goal**: Calculate maximum drawdown and recovery periods.
+**Functions**:
+- [x] `drawdown_stats(series) -> {max_dd, peak_date, trough_date, recovery_date|null}`
+- [x] `rolling_drawdown()` - rolling window analysis
+- [x] `calculate_drawdown_metrics()` - with data sufficiency checks
+**Tests**: Crafted series with one big dip and later recovery; assert dates & %.
+**Commit**: `feat(analysis): A3 drawdown & recovery`
 
-### Phase 6: Quality Assurance
-9. **Testing Suite** (2 hours)
-   - [ ] Unit tests for calculations
-   - [ ] Golden ticker snapshots (AAPL, MSFT, SPY)
-   - [ ] Integration tests
-   - [ ] Data validation tests
-   - [ ] Report comparison tests
+#### A4 — 13F Concentration (pure) ✅
+**Goal**: Calculate institutional ownership concentration metrics.
+**Functions**:
+- [x] `concentration_ratios(value_by_holder: dict) -> {cr1, cr5, cr10}`
+- [x] `herfindahl_index()` - HHI calculation
+- [x] `calculate_concentration_metrics()` - complete analysis
+- [x] `analyze_13f_holdings()` - process holdings list for ticker
+**Tests**: Tiny dict fixtures where CRn/HHI are easy to verify by hand.
+**Commit**: `feat(analysis): A4 13F concentration`
 
-10. **Documentation** (1 hour)
-    - [ ] README with quick start
-    - [ ] API documentation
-    - [ ] Configuration guide
-    - [ ] Troubleshooting section
+#### A5 — Metric Aggregator (pure) ✅
+**Goal**: Compose all metrics into single JSON output.
+**Functions**:
+- [x] `compose_metrics(price_df, holdings_df|null, as_of_date|null) -> MetricsJSON`
+- [x] Complete integration of returns, volatility, drawdown, and concentration
+- [x] Data quality assessment and metadata generation
+**Tests**: Feed AAPL fixture + tiny 13F fixture; assert combined JSON matches golden.
+**Commit**: `feat(analysis): A5 metric aggregator`
+
+#### A6 — Orchestrated Analysis Job (thin I/O) ✅
+**Goal**: Query SQLite for ticker + date window, call pure functions, persist analysis JSON.
+**Functions**:
+- [x] `analyze_ticker()` - complete SQLite to MetricsJSON pipeline
+- [x] `_query_price_data()` and `_query_holdings_data()` - database queries
+- [x] `batch_analyze_tickers()` - multi-ticker analysis
+- [x] Persist to `data/processed/metrics/{ticker}.json`
+**Tests**: Temp DB seeded with fixture rows; output file equals golden; deterministic.
+**Commit**: `feat(analysis): A6 analysis orchestration`
+
+#### A7 — CLI/Task Entry Points (thin I/O)
+**Goal**: Human-visible commands for metric calculation.
+**Commands**:
+- [ ] `analyze_ticker TICKER --start YYYY-MM-DD --end YYYY-MM-DD`
+- [ ] `show_metrics TICKER` (prints path + short summary)
+**Tests**: Subprocess call in temp workspace with seeded DB; assert exit code and output.
+**Commit**: `feat(analysis): A7 CLI entry points`
+
+#### A8 — Guardrails & Docs Polish ✅
+**Goal**: Add validation and documentation.
+**Features**:
+- [x] Stop-and-Ask checks: missing 150+ trading days when 1Y required
+- [x] Conflicting duplicate 13F rows detection
+- [x] NaN/infinite input validation
+- [x] Data freshness warnings and price integrity checks
+- [x] Complete guardrail system with recommendations
+- [x] Update DATAFLOW.md with analysis workflows
+**Commit**: `feat(analysis): A8 guardrails & documentation`
+
+### Path 2 Stub: Report Shell (After A5)
+
+#### R0 — Markdown View Template (pure)
+**Goal**: Jinja/Markdown template that renders MetricsJSON.
+**Features**:
+- [ ] Tables for returns, volatility, drawdown, concentration
+- [ ] Unit test: known MetricsJSON → golden .md file
+**Commit**: `feat(reports): R0 markdown template`
+
+#### R1 — render_report TICKER (thin I/O)
+**Goal**: Read MetricsJSON and write formatted report.
+**Functions**:
+- [ ] `render_report(ticker)` → reads metrics JSON, writes `/reports/{ticker}/{date}_metrics.md`
+**Tests**: Seeded file → assert exact content matches expected.
+**Commit**: `feat(reports): R1 report renderer`
+
+## Future Development Strategy
+
+### Phase 4: Enhanced JSON + AI Reports (Current Sprint)
+
+#### EJ0 — v2 Schema & Fixtures (pure)
+**Goal**: Define Enhanced MetricsJSON v2 schema with formatted values and interpretations.
+**Deliverables**:
+- [ ] docs/METRICS_V2.md (schema + classification thresholds)
+- [ ] Golden v2 fixtures (AAPL, MSFT)
+- [ ] Schema/shape tests only
+**Commit**: `feat(reports): EJ0 v2 schema & fixtures`
+
+#### EJ1 — Labelers (pure)
+**Goal**: Deterministic classification functions for volatility and concentration levels.
+**Functions**:
+- [ ] `classify_vol_level(ann_vol)` - low <20%, moderate 20-35%, high >35%
+- [ ] `classify_concentration(conc)` - prefer CR5, fallback HHI with thresholds
+**Tests**: Threshold boundaries and edge cases.
+**Commit**: `feat(reports): EJ1 classification labelers`
+
+#### EJ2 — Formatter (pure)
+**Goal**: Deterministic string formatting for display values.
+**Functions**:
+- [ ] Format percentages (1 decimal), dates (Month D, YYYY), currency ($12.3B)
+- [ ] Consistent formatting across all metrics
+**Tests**: Deterministic formatting with edge cases.
+**Commit**: `feat(reports): EJ2 display formatters`
+
+#### EJ3 — v1→v2 Builder (pure)
+**Goal**: Convert existing MetricsJSON to Enhanced v2 format with audit index.
+**Functions**:
+- [ ] `build_enhanced_metrics_v2(metrics_v1) -> metrics_v2`
+- [ ] Populate audit_index with all allowed strings/numbers
+- [ ] Apply labelers and formatters
+**Tests**: Fixture v1 → expected v2 exactly.
+**Commit**: `feat(reports): EJ3 v1 to v2 builder`
+
+#### EJ4 — Exec-Summary Skeleton (pure)
+**Goal**: Build executive summary skeleton with all data pre-filled.
+**Functions**:
+- [ ] `build_exec_summary_skeleton(v2) -> str`
+- [ ] Handle missing fields with "Not available"
+- [ ] Include volatility, drawdown, concentration per policy
+**Tests**: Fixture → exact expected skeleton string.
+**Commit**: `feat(reports): EJ4 executive summary skeleton`
+
+#### EJ5 — LLM Polisher (thin I/O)
+**Goal**: Polish skeleton for readability without changing any data.
+**Implementation**:
+- [ ] Reuse Ollama client with System/Developer/User prompts
+- [ ] Enforce 120-180 words (truncate if needed)
+- [ ] No number/date changes allowed
+**Tests**: Mocked responses; word count enforcement.
+**Commit**: `feat(reports): EJ5 LLM polisher`
+
+#### EJ6 — Number/Date Audit (pure)
+**Goal**: Audit LLM output against v2 audit_index for hallucinations.
+**Functions**:
+- [ ] `audit_narrative(text, v2) -> bool|diagnostic`
+- [ ] Tolerance: ±0.1pp on percentage formatting
+- [ ] Extract and verify all numbers/dates
+**Tests**: Pass/fail scenarios with tolerance testing.
+**Commit**: `feat(reports): EJ6 number audit system`
+
+#### EJ7 — Composer & CLI (thin I/O)
+**Goal**: Complete report generation with tables + narrative.
+**Implementation**:
+- [ ] Merge data tables + AI narrative into full report
+- [ ] Write to `reports/{TICKER}/{timestamp}_report.md`
+- [ ] Update latest.md and latest_reports.json
+- [ ] CLI: `python cli.py report AAPL`
+**Tests**: Golden markdown output; atomic writes; idempotence.
+**Commit**: `feat(reports): EJ7 complete report system`
+
+**Timeline**: 2-3 days for complete AI report generation system
+
+### Phase L: LangChain Integration (Current)
+
+#### LC0 — Dependency & Env Guard (pure)
+**Goal**: Add minimal LangChain deps: `langchain-core`, `langchain-ollama`. Keep telemetry off unless `LANGSMITH_TRACING=true`.
+**Acceptance**:
+- [ ] `requirements.txt` scoped deps (no unintended integrations)
+- [ ] Startup check warns if tracing env is set; otherwise remains disabled
+- [ ] `docs/THOUGHTLOG.md` entry: why LC is limited to polish-only
+**Tests**:
+- [ ] Import tests pass without optional backends
+- [ ] Env gate test confirms tracing is off by default
+**Commit**: `feat(langchain): LC0 minimal deps + env guard`
+
+#### LC1 — Exec Summary Chain (LCEL)
+**Goal**: Build a chain: System/Developer/User prompts → `OllamaLLM` → parser that enforces "one paragraph, 120–180 words".
+**Input**: v2 MetricsJSON (or a stub fixture if v2 not done yet) + pre-filled skeleton string from our builder
+**Output**: single paragraph string
+**Acceptance**:
+- [ ] Length enforced; structure parseable; fails closed on format drift
+- [ ] `docs/THOUGHTLOG.md`: why LCEL + parser approach; alternatives considered
+**Tests**:
+- [ ] Fixtures → success; over/under-length cases → retry once then truncate/decline per policy
+**Commit**: `feat(langchain): LC1 exec-summary chain with structured parser`
+
+#### LC2 — Number/Date Audit Runnable (pure)
+**Goal**: Wrap LC1 output with an audit that extracts numbers/dates and ensures they are a subset of `audit_index`.
+**Acceptance**:
+- [ ] Tolerance for percent formatting (e.g., 28.5% vs 28.50%)
+- [ ] Fallback to skeleton if audit fails twice; log warn
+**Tests**:
+- [ ] Positive/negative cases; tolerance edges
+**Commit**: `feat(langchain): LC2 numeric/date audit + fallback`
+
+#### LC3 — Risks Bullets Chain (LCEL)
+**Goal**: Chain that outputs **3–5 bullets**; parser enforces list-of-strings with length bounds; audit numbers/dates like LC2.
+**Acceptance**:
+- [ ] Exactly 3–5 bullets; no new numbers/dates
+- [ ] `docs/THOUGHTLOG.md` update: design choices
+**Tests**:
+- [ ] Fixtures hit min/max; bad-format retry then fallback
+**Commit**: `feat(langchain): LC3 risks bullets chain with parser & audit`
+
+#### LC4 — CLI Glue & Switch
+**Goal**: `report TICKER --llm=on|off` gates calling LC1/LC3; default off.
+**Acceptance**:
+- [ ] When `--llm=off`: deterministic tables only
+- [ ] When `--llm=on`: invokes chains; on audit failure → skeleton fallback
+- [ ] Update `docs/DECISIONS/ADR-00XX.md` ("LangChain limited to polish-only")
+**Tests**:
+- [ ] CLI e2e with fixtures; exit codes; idempotent output
+**Commit**: `feat(langchain): LC4 CLI switch + e2e tests`
+
+### Phase SNT: Sentiment Analysis (After LangChain)
+
+#### SNT0 — ADR & Scope Definition
+**Goal**: Define sentiment analysis architecture and scope
+**Acceptance**:
+- [ ] Create `decisions/ADR-00XX.md` for sentiment approach
+- [ ] RSS-first strategy with optional external providers
+- [ ] Local FinBERT model for sentiment classification
+- [ ] Integration with v2 MetricsJSON schema
+**Commit**: `feat(sentiment): SNT0 architecture decision record`
+
+#### SNT1 — RSS News Ingestion
+**Goal**: Ingest news from RSS feeds for ticker-specific sentiment
+**Functions**:
+- [ ] `fetch_rss_news(ticker, days=7)` - RSS feed aggregation
+- [ ] `parse_news_items()` - extract title, content, date, source
+- [ ] RSS source configuration in `config/rss_sources.yml`
+**Tests**:
+- [ ] Mock RSS responses; parse various feed formats
+**Commit**: `feat(sentiment): SNT1 RSS news ingestion pipeline`
+
+#### SNT2 — Optional News Providers (OpenBB/NewsAPI)
+**Goal**: Optional integration with external news APIs
+**Functions**:
+- [ ] `fetch_openbb_news()` - OpenBB integration
+- [ ] `fetch_newsapi_news()` - NewsAPI integration
+- [ ] Provider fallback chain with rate limiting
+**Tests**:
+- [ ] Mocked provider responses; credential validation
+**Commit**: `feat(sentiment): SNT2 optional news providers`
+
+#### SNT3 — News Normalization & Storage
+**Goal**: Normalize news from all sources and store in SQLite
+**Schema**: `news` table with ticker, title, content, source, published_date, sentiment_score
+**Functions**:
+- [ ] `normalize_news_item()` - canonical format
+- [ ] `upsert_news()` - idempotent storage
+**Tests**:
+- [ ] Schema validation; deduplication logic
+**Commit**: `feat(sentiment): SNT3 news normalization & storage`
+
+#### SNT4 — Local Sentiment Classification
+**Goal**: Local FinBERT model for financial sentiment scoring
+**Functions**:
+- [ ] `classify_sentiment(text)` - FinBERT inference
+- [ ] `batch_classify_news()` - efficient batch processing
+- [ ] Model download and caching
+**Tests**:
+- [ ] Known financial text → expected sentiment scores
+**Commit**: `feat(sentiment): SNT4 local sentiment classifier`
+
+#### SNT5 — Sentiment Aggregation
+**Goal**: Aggregate news sentiment into ticker-level metrics
+**Functions**:
+- [ ] `aggregate_sentiment_metrics(ticker, days=7)` - time-weighted scoring
+- [ ] `sentiment_trend_analysis()` - trend detection
+- [ ] Integration with existing MetricsJSON
+**Tests**:
+- [ ] Synthetic news data → expected aggregations
+**Commit**: `feat(sentiment): SNT5 sentiment aggregation metrics`
+
+#### SNT6 — Report Section Integration
+**Goal**: Add sentiment section to reports with LLM narrative
+**Features**:
+- [ ] Sentiment metrics in v2 MetricsJSON
+- [ ] LangChain chain for sentiment narrative
+- [ ] Integration with existing report generation
+**Tests**:
+- [ ] End-to-end report with sentiment section
+**Commit**: `feat(sentiment): SNT6 report integration`
+
+#### SNT7 — CLI Commands
+**Goal**: Human-visible sentiment commands
+**Commands**:
+- [ ] `sentiment TICKER --days=7` - show sentiment metrics
+- [ ] `news TICKER --days=7` - show recent news items
+**Tests**:
+- [ ] CLI e2e with mocked data
+**Commit**: `feat(sentiment): SNT7 CLI commands`
+
+#### SNT8 — Caching & Performance
+**Goal**: Optimize sentiment pipeline performance
+**Features**:
+- [ ] News item caching with TTL
+- [ ] Batch sentiment processing
+- [ ] Rate limiting for external APIs
+**Tests**:
+- [ ] Performance benchmarks; cache hit rates
+**Commit**: `feat(sentiment): SNT8 caching & performance`
+
+### Phase 5: Advanced Features (Future)
+**Potential Enhancements:**
+- Valuation metrics (P/E, P/B ratios)
+- Sector/industry comparisons
+- Portfolio-level analysis
+- Historical trend analysis
+
+### Phase 6: Production Polish (Future)
+**Potential Improvements:**
+- Bulk operations for multiple tickers
+- Automated daily data collection
+- Performance monitoring dashboard
+- Advanced data quality checks
+- Report scheduling and alerts
+
+## Legacy Planning (Superseded by Current Implementation)
+
+*The sections below were from the original plan and have been superseded by the actual implementation in Phases 1-3. Keeping for historical reference.*
 
 ## Milestones
 
@@ -209,13 +497,35 @@
 | M4: Reporting | Day 4 | Full report generation working |
 | M5: Polish | Day 5 | Tests passing, docs complete |
 
-## Next Actions
+## Current Status: FOUNDATION COMPLETE ✅
 
-1. Finish planning documents (assumptions.md, risks.md, changelog.md)
-2. Create ADR-0001 for local-first architecture
-3. Set up project directory structure
-4. Create .gitignore and .env.example
-5. Begin database schema implementation
+### What We've Built (Phases 1-3 Complete)
+- ✅ **Rock-solid data pipeline**: yfinance + SEC EDGAR → SQLite
+- ✅ **Complete analysis engine**: Returns, volatility, drawdown, 13F concentration
+- ✅ **Production CLI tools**: Data collection and analysis commands
+- ✅ **Report storage infrastructure**: Ticker libraries with atomic operations
+- ✅ **Real Ollama integration**: Working LLM client with your models
+
+### Next Phase Strategy (ADR-0003)
+**Enhanced MetricsJSON for LLM Integration**
+- Enhance current MetricsJSON with formatted values and interpretations
+- Create LLM-readable structured data (not prose templates)
+- Build narrative generation from enhanced JSON
+- Foundation for multi-section reports and sentiment integration
+
+### Immediate Commands Available
+```bash
+# Data Collection
+python pipeline/run.py daily_prices AAPL 60
+python pipeline/run.py quarterly_13f "BERKSHIRE HATHAWAY INC" 2024-12-31
+
+# Financial Analysis  
+python analysis/analyze_ticker.py AAPL
+python analysis/show_metrics.py AAPL
+
+# Database Inspection
+python check_db.py
+```
 
 ## Non-Goals (Explicitly Out of Scope)
 

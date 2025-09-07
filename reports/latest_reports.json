@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at_utc": "2025-09-07T03:45:39.348917+00:00",
+  "timezone": "Pacific Daylight Time",
+  "latest": [
+    {
+      "ticker": "AAPL",
+      "report_path": "reports\\AAPL\\2025-09-06_200706_report.md",
+      "latest_path": "reports\\AAPL\\latest.md",
+      "run_id": null,
+      "generated_at_local": "2025-09-06T20:07:06.927493",
+      "pointer_strategy": "copy"
+    },
+    {
+      "ticker": "MSFT",
+      "report_path": "reports\\MSFT\\2025-09-06_200753_report.md",
+      "latest_path": "reports\\MSFT\\latest.md",
+      "run_id": null,
+      "generated_at_local": "2025-09-06T20:07:53.946459",
+      "pointer_strategy": "copy"
+    },
+    {
+      "ticker": "TSLA",
+      "report_path": "reports\\TSLA\\2025-09-06_204539_report.md",
+      "latest_path": "reports\\TSLA\\latest.md",
+      "run_id": null,
+      "generated_at_local": "2025-09-06T20:45:39.329419",
+      "pointer_strategy": "copy"
+    }
+  ]
+}

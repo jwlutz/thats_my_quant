@@ -118,9 +118,9 @@ def normalize_13f(
         # Get filer name
         filer = raw.get('Company Name', '')
         
-        # Infer ticker from issuer name (best effort)
-        # This is a simple mapping - could be enhanced with a mapping table
-        ticker = _infer_ticker(raw.get('nameOfIssuer', ''))
+        # Infer ticker from issuer name using comprehensive mapping
+        from .ticker_mapper import infer_ticker_from_name
+        ticker = infer_ticker_from_name(raw.get('nameOfIssuer', ''))
         
         # Get CUSIP (already 9 chars from SEC)
         cusip = raw.get('cusip', '')
@@ -184,6 +184,7 @@ def _infer_ticker(issuer_name: str) -> str:
         'JOHNSON & JOHNSON': 'JNJ',
         'VISA INC': 'V',
         'PROCTER & GAMBLE CO': 'PG',
+        'TESLA INC': 'TSLA',  # Add Tesla mapping
         # Add more mappings as needed
     }
     

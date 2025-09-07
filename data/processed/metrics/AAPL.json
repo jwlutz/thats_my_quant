@@ -1,0 +1,71 @@
+{
+  "ticker": "AAPL",
+  "as_of_date": "2025-09-06",
+  "data_period": {
+    "start_date": "2025-09-02",
+    "end_date": "2025-09-05",
+    "trading_days": 4
+  },
+  "price_metrics": {
+    "returns": {
+      "1D": -0.00037532879451496193,
+      "1W": null,
+      "1M": null,
+      "3M": null,
+      "6M": null,
+      "1Y": null
+    },
+    "volatility": {
+      "21D_annualized": null,
+      "63D_annualized": null,
+      "252D_annualized": null
+    },
+    "drawdown": {
+      "max_drawdown_pct": null,
+      "peak_date": null,
+      "trough_date": null,
+      "recovery_date": null,
+      "drawdown_days": null,
+      "recovery_days": null
+    },
+    "current_price": {
+      "close": 239.69000244140625,
+      "date": "2025-09-05"
+    }
+  },
+  "institutional_metrics": {
+    "total_13f_value_usd": 879808000.0,
+    "total_13f_holders": 1,
+    "concentration": {
+      "cr1": 1.0,
+      "cr5": 1.0,
+      "cr10": 1.0,
+      "hhi": 1.0
+    },
+    "top_holders": [
+      {
+        "rank": 1,
+        "filer": "BERKSHIRE HATHAWAY INC",
+        "value_usd": 879808000.0,
+        "shares": 3776000.0,
+        "pct_of_13f_total": 1.0
+      }
+    ],
+    "quarter_end": "2024-09-30",
+    "filing_lag_days": 341
+  },
+  "data_quality": {
+    "price_coverage_pct": 100.0,
+    "missing_price_days": 0,
+    "latest_13f_quarter": "2024-09-30",
+    "13f_data_age_days": 341
+  },
+  "metadata": {
+    "calculated_at": "2025-09-06T18:15:37.232768",
+    "calculation_version": "1.0.0",
+    "data_sources": [
+      "sec_edgar",
+      "yfinance"
+    ]
+  }
+}

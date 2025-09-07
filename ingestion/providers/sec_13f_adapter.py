@@ -8,6 +8,10 @@ import sys
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Optional
 import pandas as pd
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import the existing scraper
 # Add the project root to path to import data_extraction

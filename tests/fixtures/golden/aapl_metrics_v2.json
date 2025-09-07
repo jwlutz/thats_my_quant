@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "ticker": "AAPL",
+    "company": "Apple Inc.",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "as_of_local": "2025-09-06T14:30:00-07:00",
+    "as_of_utc": "2025-09-06T21:30:00Z",
+    "timezone": "America/Los_Angeles",
+    "run_id": 123,
+    "sources": ["yfinance", "sec_edgar"],
+    "schema_version": "2.0.0"
+  },
+  "price": {
+    "current": {
+      "value": 229.87,
+      "display": "$229.87",
+      "date": "2025-09-05",
+      "date_display": "September 5, 2025"
+    },
+    "returns": {
+      "windows": ["1D", "1W", "1M", "3M", "6M", "1Y"],
+      "raw": {
+        "1D": -0.0034,
+        "1W": 0.0156,
+        "1M": 0.0891,
+        "3M": 0.1245,
+        "6M": 0.0678,
+        "1Y": 0.2134
+      },
+      "display": {
+        "1D": "-0.3%",
+        "1W": "1.6%",
+        "1M": "8.9%",
+        "3M": "12.5%",
+        "6M": "6.8%",
+        "1Y": "21.3%"
+      },
+      "best_period": "1Y",
+      "worst_period": "1D"
+    },
+    "volatility": {
+      "window_days": 21,
+      "raw": 0.2845,
+      "display": "28.5%",
+      "level": "moderate",
+      "window_display": "(21-day)"
+    },
+    "drawdown": {
+      "max_dd_raw": -0.1845,
+      "max_dd_display": "-18.5%",
+      "peak_date": "2025-07-15",
+      "peak_date_display": "July 15, 2025",
+      "trough_date": "2025-08-12",
+      "trough_date_display": "August 12, 2025",
+      "recovery_date": "2025-08-28",
+      "recovery_date_display": "August 28, 2025",
+      "recovered": true,
+      "duration_days": 28,
+      "recovery_status": "fully recovered"
+    }
+  },
+  "ownership_13f": {
+    "as_of": "2024-09-30",
+    "as_of_display": "September 30, 2024",
+    "total_value": {
+      "raw": 125000000000.0,
+      "display": "$125.0B"
+    },
+    "total_holders": 145,
+    "concentration": {
+      "basis": "CR5",
+      "level": "moderate",
+      "cr1": {"raw": 0.0456, "display": "4.6%"},
+      "cr5": {"raw": 0.1234, "display": "12.3%"},
+      "cr10": {"raw": 0.2345, "display": "23.5%"},
+      "hhi": {"raw": 0.0123, "display": "0.012"}
+    },
+    "top_holders": [
+      {
+        "rank": 1,
+        "filer": "VANGUARD GROUP INC",
+        "value_raw": 5700000000.0,
+        "value_display": "$5.7B",
+        "share_of_total_raw": 0.0456,
+        "share_of_total_display": "4.6%"
+      },
+      {
+        "rank": 2,
+        "filer": "BLACKROCK INC",
+        "value_raw": 4800000000.0,
+        "value_display": "$4.8B",
+        "share_of_total_raw": 0.0384,
+        "share_of_total_display": "3.8%"
+      }
+    ],
+    "disclaimer": "13F reflects reported long U.S. positions with reporting lag; not total float."
+  },
+  "data_quality": {
+    "price_coverage": {"raw": 0.985, "display": "98.5%"},
+    "missing_days": 3,
+    "13f_age_days": 45,
+    "limitations": ["quarterly_13f_lag", "weekend_gaps_normal"]
+  },
+  "footnotes": [
+    "Volatility annualized with √252.",
+    "No back-adjustment of OHLCV; adj_close reported if available.",
+    "13F data has 45-day regulatory filing lag."
+  ],
+  "audit_index": {
+    "percent_strings": ["-0.3%", "1.6%", "8.9%", "12.5%", "6.8%", "21.3%", "28.5%", "-18.5%", "4.6%", "12.3%", "23.5%", "0.012", "98.5%", "3.8%"],
+    "currency_strings": ["$229.87", "$125.0B", "$5.7B", "$4.8B"],
+    "dates": ["September 5, 2025", "July 15, 2025", "August 12, 2025", "August 28, 2025", "September 30, 2024"],
+    "labels": ["moderate", "CR5", "fully recovered"],
+    "numbers": [229.87, 125.0, 5.7, 4.8, 145, 28, 45, 3],
+    "windows": ["(21-day)", "1-day", "1-month", "3-month", "6-month", "1-year"]
+  }
+}

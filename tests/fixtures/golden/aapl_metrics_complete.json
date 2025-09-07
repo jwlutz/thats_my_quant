@@ -1,0 +1,83 @@
+{
+  "ticker": "AAPL",
+  "as_of_date": "2025-09-06",
+  "data_period": {
+    "start_date": "2024-09-06",
+    "end_date": "2025-09-06",
+    "trading_days": 252
+  },
+  "price_metrics": {
+    "returns": {
+      "1D": -0.0034,
+      "1W": 0.0156,
+      "1M": 0.0891,
+      "3M": 0.1245,
+      "6M": 0.0678,
+      "1Y": 0.2134
+    },
+    "volatility": {
+      "21D_annualized": 0.2845,
+      "63D_annualized": 0.3124,
+      "252D_annualized": 0.2967
+    },
+    "drawdown": {
+      "max_drawdown_pct": -0.1845,
+      "peak_date": "2025-07-15",
+      "trough_date": "2025-08-12",
+      "recovery_date": "2025-08-28",
+      "drawdown_days": 28,
+      "recovery_days": 16
+    },
+    "current_price": {
+      "close": 229.87,
+      "date": "2025-09-05"
+    }
+  },
+  "institutional_metrics": {
+    "total_13f_value_usd": 125000000000.0,
+    "total_13f_holders": 145,
+    "concentration": {
+      "cr1": 0.0456,
+      "cr5": 0.1234,
+      "cr10": 0.2345,
+      "hhi": 0.0123
+    },
+    "top_holders": [
+      {
+        "rank": 1,
+        "filer": "VANGUARD GROUP INC",
+        "value_usd": 5700000000.0,
+        "shares": 25000000,
+        "pct_of_13f_total": 0.0456
+      },
+      {
+        "rank": 2,
+        "filer": "BLACKROCK INC", 
+        "value_usd": 4800000000.0,
+        "shares": 21000000,
+        "pct_of_13f_total": 0.0384
+      },
+      {
+        "rank": 3,
+        "filer": "STATE STREET CORP",
+        "value_usd": 3200000000.0,
+        "shares": 14000000,
+        "pct_of_13f_total": 0.0256
+      }
+    ],
+    "quarter_end": "2024-09-30",
+    "filing_lag_days": 45
+  },
+  "data_quality": {
+    "price_coverage_pct": 98.5,
+    "missing_price_days": 3,
+    "latest_13f_quarter": "2024-09-30",
+    "13f_data_age_days": 45
+  },
+  "metadata": {
+    "calculated_at": "2025-09-06T14:30:00",
+    "calculation_version": "1.0.0", 
+    "data_sources": ["yfinance", "sec_edgar"],
+    "run_id": 123
+  }
+}

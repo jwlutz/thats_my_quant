@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "ticker": "MSFT",
+    "company": "MSFT Inc.",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "as_of_local": "2025-09-06T15:00:00-07:00",
+    "as_of_utc": "2025-09-07T03:07:46.388819+00:00",
+    "timezone": "America/Los_Angeles",
+    "run_id": null,
+    "sources": [
+      "yfinance"
+    ],
+    "schema_version": "2.0.0"
+  },
+  "price": {
+    "current": {
+      "value": 495.0,
+      "display": "$495.00",
+      "date": "2025-09-05",
+      "date_display": "September 05, 2025"
+    },
+    "returns": {
+      "windows": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "6M",
+        "1Y"
+      ],
+      "raw": {
+        "1D": -0.025533006259296664,
+        "1W": -0.02872618755914713,
+        "1M": null,
+        "3M": null,
+        "6M": null,
+        "1Y": null
+      },
+      "display": {
+        "1D": "-2.6%",
+        "1W": "-2.9%",
+        "1M": "Not available",
+        "3M": "Not available",
+        "6M": "Not available",
+        "1Y": "Not available"
+      },
+      "overall": "flat",
+      "trend": "unknown",
+      "best_period": "1W",
+      "best_return": -0.02872618755914713
+    },
+    "volatility": {
+      "window_days": 21,
+      "raw": null,
+      "display": "Not available",
+      "level": "unknown",
+      "window_display": "(21-day)"
+    },
+    "drawdown": {
+      "max_dd_raw": -0.063158980583786,
+      "max_dd_display": "-6.3%",
+      "peak_date": "2025-08-12",
+      "peak_date_display": "August 12, 2025",
+      "trough_date": "2025-09-05",
+      "trough_date_display": "September 05, 2025",
+      "recovery_date": null,
+      "recovery_date_display": null,
+      "recovered": false,
+      "duration_days": "17",
+      "recovery_status": "unrecovered as of September 06, 2025"
+    }
+  },
+  "data_quality": {
+    "price_coverage": {
+      "raw": 1.0,
+      "display": "100.0%"
+    },
+    "missing_days": 0,
+    "13f_age_days": null,
+    "limitations": [
+      "quarterly_13f_lag",
+      "weekend_gaps_normal"
+    ]
+  },
+  "footnotes": [
+    "Volatility annualized with \u221a252.",
+    "No back-adjustment of OHLCV; adj_close reported if available.",
+    "13F data has 45-day regulatory filing lag."
+  ],
+  "audit_index": {
+    "percent_strings": [
+      "100.0%"
+    ],
+    "currency_strings": [
+      "$495.00"
+    ],
+    "dates": [
+      "August 12, 2025",
+      "September 05, 2025"
+    ],
+    "labels": [
+      "unknown",
+      "unrecovered as of September 06, 2025"
+    ],
+    "numbers": [],
+    "windows": [
+      "(21-day)"
+    ]
+  }
+}

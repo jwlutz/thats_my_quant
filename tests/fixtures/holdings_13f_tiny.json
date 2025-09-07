@@ -1,0 +1,38 @@
+[
+  {
+    "cik": "0001067983",
+    "filer": "BERKSHIRE HATHAWAY INC",
+    "ticker": "AAPL", 
+    "name": "APPLE INC",
+    "cusip": "037833100",
+    "value_usd": 50000000000.0,
+    "shares": 250000000.0,
+    "as_of": "2024-09-30",
+    "source": "sec_edgar",
+    "ingested_at": "2025-01-15T10:00:00"
+  },
+  {
+    "cik": "0000102909",
+    "filer": "VANGUARD GROUP INC",
+    "ticker": "AAPL",
+    "name": "APPLE INC", 
+    "cusip": "037833100",
+    "value_usd": 30000000000.0,
+    "shares": 150000000.0,
+    "as_of": "2024-09-30",
+    "source": "sec_edgar",
+    "ingested_at": "2025-01-15T10:00:00"
+  },
+  {
+    "cik": "0001364742",
+    "filer": "BLACKROCK INC",
+    "ticker": "AAPL",
+    "name": "APPLE INC",
+    "cusip": "037833100", 
+    "value_usd": 20000000000.0,
+    "shares": 100000000.0,
+    "as_of": "2024-09-30",
+    "source": "sec_edgar",
+    "ingested_at": "2025-01-15T10:00:00"
+  }
+]

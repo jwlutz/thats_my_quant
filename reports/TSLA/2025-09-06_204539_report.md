@@ -1,0 +1,63 @@
+# Stock Research Report: TSLA
+
+**Company:** TSLA Inc.
+**Currency:** USD
+**Current Price:** $350.84 (September 05, 2025)
+**Generated:** 2025-09-06T15:00:00-07:00
+**Report ID:** None
+
+---
+
+## Executive Summary
+
+TSLA Inc. (TSLA) closed at $350.84 as of September 05, 2025. Returns were 9.7% (1-month), 1.4% (1-week), and 3.6% (1-day). The stock exhibited high volatility of 35.0% (21-day). The stock experienced a maximum drawdown of -15.7% from June 23, 2025 to July 07, 2025, fully recovered by August 26, 2025. Institutional ownership data not available. Price data coverage is 100.0%. Data sourced from yfinance.
+
+---
+
+## Price Snapshot
+
+### Returns by Period
+
+| Period | Return |
+|--------|--------|
+| 1 Day | 3.6% |
+| 1 Week | 1.4% |
+| 1 Month | 9.7% |
+| 3 Month | Not available |
+| 6 Month | Not available |
+| 1 Year | Not available |
+### Volatility & Risk
+
+**Volatility (21-day):** 35.0% (high level)
+
+**Maximum Drawdown:** -15.7%
+**Drawdown Period:** June 23, 2025 to July 07, 2025
+**Recovery Status:** fully recovered by August 26, 2025
+
+---
+
+## Ownership Snapshot
+
+*Institutional ownership data not available.*
+
+---
+
+## Appendix
+
+### Data Sources
+- **Price Data:** yfinance
+- **Analysis Engine:** v2.0.0
+
+### Data Quality
+- **Price Coverage:** 100.0%
+- **Missing Days:** 0
+- **13F Data Age:** None days
+
+### Report Metadata
+- **Generated:** 2025-09-06T15:00:00-07:00
+- **Run ID:** None
+- **Timezone:** America/Los_Angeles
+
+---
+
+*This report is for informational purposes only. Not investment advice. Always conduct your own research before making investment decisions.*

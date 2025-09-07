@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-01-XX
+
+#### Phase L: LangChain Integration (LC0-LC4)
+- **LC0 Dependencies & Environment Guard**: Added minimal LangChain deps (langchain-core, langchain-ollama) with telemetry disabled by default
+- **Environment Validation**: Comprehensive setup validation with warnings for enabled telemetry
+- **Import Guards**: Graceful handling of missing LangChain dependencies with clear error messages
+
+### Added - 2025-09-06
+
+#### Post-MVP System Refinements
+- **Enhanced Ticker Mapping**: Integrated US-Stock-Symbols repo for comprehensive ticker mapping (6,999+ symbols from NASDAQ/NYSE/AMEX)
+- **Improved Anti-Hallucination**: Relaxed tolerance for reasonable rounding (1.0% for percentages, 5% for numbers) 
+- **Emoji Removal**: Removed all emojis from CLI output and report content per user preference
+- **Ticker Utilities**: Created `utils/list_tickers.py` for ticker validation, lookup, and statistics
+- **Documentation**: Added comprehensive ticker symbol documentation in `docs/TICKER_SYMBOLS.md`
+- **Codebase Cleanup**: Removed temporary debugging files and finalized system
+
+#### MVP Completion - All Phases Done
+
+#### Phase 4: Report Infrastructure Complete
+- Implemented ticker library storage architecture (reports/TICKER/latest.md structure)
+- Built atomic file writing system preventing partial writes and corruption
+- Created latest pointer system with symlink/copy fallback for Windows compatibility
+- Developed cross-ticker index for "what did I analyze today" discovery
+- Integrated real Ollama LLM client with model availability checking and error handling
+- Established enhanced MetricsJSON strategy for future LLM integration (ADR-0003)
+
+#### Phase 3: Analysis Engine Complete (A0-A8)
+- Implemented complete financial calculations: returns (1D-1Y), volatility (annualized), drawdown analysis
+- Built 13F institutional concentration metrics (CR1/CR5/CR10, HHI)
+- Created metrics aggregator combining all calculations into standardized JSON
+- Added production guardrails with data quality validation and stop-and-ask triggers
+- Developed CLI interface for human-usable analysis commands
+- 140+ comprehensive tests ensuring mathematical accuracy and edge case handling
+
+#### Phase 2: Data Pipeline Complete (T0-T8)
+- Built complete data ingestion system with yfinance and SEC EDGAR integration
+- Implemented schema contracts, validators, normalizers with minimal normalization policy
+- Created idempotent SQLite loaders with proven atomicity
+- Developed provider adapters with mocked testing (no live API calls in CI)
+- Built run registry system tracking all pipeline executions with metrics
+- Created daily_prices and quarterly_13f DAGs with complete orchestration
+- Real financial data successfully ingested and stored (AAPL, MSFT, institutional holdings)
+
 ### Added - 2024-12-19
 
 #### T8: Quarterly 13F DAG (Phase 2 Complete!)

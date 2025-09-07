@@ -1,0 +1,79 @@
+# Stock Research Report: AAPL
+
+**Company:** AAPL Inc.
+**Currency:** USD
+**Current Price:** $239.69 (September 05, 2025)
+**Generated:** 2025-09-06T15:00:00-07:00
+**Report ID:** None
+
+---
+
+## Executive Summary
+
+AAPL Inc. (AAPL) closed at $239.69 as of September 05, 2025. The stock returned -0.0% (1-day). Volatility data not available. Drawdown analysis not available. Institutional ownership shows high concentration based on CR5 with top 5 holders controlling 100.0% across 1 institutions totaling $879.8M. Price data coverage is 100.0%. Data sourced from sec_edgar, yfinance.
+
+---
+
+## Price Snapshot
+
+### Returns by Period
+
+| Period | Return |
+|--------|--------|
+| 1 Day | 📈 -0.0% |
+| 1 Week |  Not available |
+| 1 Month |  Not available |
+| 3 Month |  Not available |
+| 6 Month |  Not available |
+| 1 Year |  Not available |
+### Volatility & Risk
+
+**Volatility (21-day):** Not available (unknown level)
+
+**Maximum Drawdown:** Not available
+**Drawdown Period:** Not available to Not available
+**Recovery Status:** unrecovered as of September 06, 2025
+
+---
+
+## Ownership Snapshot
+
+**Total 13F Holdings:** $879.8M (1 institutions)
+**Reporting Quarter:** September 30, 2024
+
+### Concentration Analysis
+
+| Metric | Value | Level |
+|--------|-------|-------|
+| Top 1 Holder | 100.0% | high |
+| Top 5 Holders | 100.0% | high |
+| Top 10 Holders | 100.0% | high |
+### Top Institutional Holders
+
+| Rank | Institution | Value | % of Total |
+|------|-------------|-------|------------|
+| 1 | BERKSHIRE HATHAWAY INC | $879.8M | 100.0% |
+
+*13F reflects reported long U.S. positions with reporting lag; not total float.*
+
+---
+
+## Appendix
+
+### Data Sources
+- **Price Data:** sec_edgar, yfinance
+- **Analysis Engine:** v2.0.0
+
+### Data Quality
+- **Price Coverage:** 100.0%
+- **Missing Days:** 0
+- **13F Data Age:** 341 days
+
+### Report Metadata
+- **Generated:** 2025-09-06T15:00:00-07:00
+- **Run ID:** None
+- **Timezone:** America/Los_Angeles
+
+---
+
+*This report is for informational purposes only. Not investment advice. Always conduct your own research before making investment decisions.*
