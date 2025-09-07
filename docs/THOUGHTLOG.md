@@ -94,6 +94,8 @@ This document tracks the rationale behind architectural and implementation decis
 - All sources optional and can be enabled/disabled independently
 
 **Status**: ARCHITECTURE UPDATED - Ready to implement SNT1B (Google Trends) and SNT1C (insider trading)
+**Status**: SNT1B COMPLETED - Google Trends integration with pytrends, abnormality detection (Z-scores + percentiles), search volume trend analysis, and comprehensive validation (27 tests passing)
+**Status**: SNT1C COMPLETED - Insider trading integration with SEC Form 4 processing, pattern detection (clustering, consensus, large transactions), baseline calculation, and comprehensive validation (21 tests passing)
 
 **Links**: Related to ADR-0005 Sentiment Analysis Architecture
 
