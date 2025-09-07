@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **LC0 Dependencies & Environment Guard**: Added minimal LangChain deps (langchain-core, langchain-ollama) with telemetry disabled by default
 - **Environment Validation**: Comprehensive setup validation with warnings for enabled telemetry
 - **Import Guards**: Graceful handling of missing LangChain dependencies with clear error messages
+- **LC1 Executive Summary Chain**: LCEL chain with structured parser enforcing 120-180 word limit, quote removal, and sentence boundary truncation
+- **LC1 Risk Bullets Chain**: LCEL chain generating 3-5 risk bullets with structured parser and format validation
+- **Parser Framework**: Pydantic-based parsers with configurable limits, retry logic, and fallback to deterministic skeletons
 
 ### Added - 2025-09-06
 

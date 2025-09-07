@@ -28,6 +28,7 @@ This document tracks the rationale behind architectural and implementation decis
 - Fallback to skeleton on audit failure to maintain deterministic output
 
 **Status**: LC0 COMPLETED - Dependencies added, environment guard implemented with comprehensive tests
+**Status**: LC1 COMPLETED - Executive summary chain with LCEL, structured parser (120-180 words), and risk bullets chain implemented with comprehensive test coverage
 
 **Links**: Related to ADR-0003 Enhanced MetricsJSON strategy
 
