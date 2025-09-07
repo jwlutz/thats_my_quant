@@ -328,74 +328,76 @@
 
 ### Phase L: LangChain Integration (Current)
 
-#### LC0 — Dependency & Env Guard (pure)
+#### LC0 — Dependency & Env Guard (pure) ✅
 **Goal**: Add minimal LangChain deps: `langchain-core`, `langchain-ollama`. Keep telemetry off unless `LANGSMITH_TRACING=true`.
 **Acceptance**:
-- [ ] `requirements.txt` scoped deps (no unintended integrations)
-- [ ] Startup check warns if tracing env is set; otherwise remains disabled
-- [ ] `docs/THOUGHTLOG.md` entry: why LC is limited to polish-only
+- [x] `requirements.txt` scoped deps (no unintended integrations)
+- [x] Startup check warns if tracing env is set; otherwise remains disabled
+- [x] `docs/THOUGHTLOG.md` entry: why LC is limited to polish-only
 **Tests**:
-- [ ] Import tests pass without optional backends
-- [ ] Env gate test confirms tracing is off by default
+- [x] Import tests pass without optional backends
+- [x] Env gate test confirms tracing is off by default
 **Commit**: `feat(langchain): LC0 minimal deps + env guard`
 
-#### LC1 — Exec Summary Chain (LCEL)
+#### LC1 — Exec Summary Chain (LCEL) ✅
 **Goal**: Build a chain: System/Developer/User prompts → `OllamaLLM` → parser that enforces "one paragraph, 120–180 words".
 **Input**: v2 MetricsJSON (or a stub fixture if v2 not done yet) + pre-filled skeleton string from our builder
 **Output**: single paragraph string
 **Acceptance**:
-- [ ] Length enforced; structure parseable; fails closed on format drift
-- [ ] `docs/THOUGHTLOG.md`: why LCEL + parser approach; alternatives considered
+- [x] Length enforced; structure parseable; fails closed on format drift
+- [x] `docs/THOUGHTLOG.md`: why LCEL + parser approach; alternatives considered
 **Tests**:
-- [ ] Fixtures → success; over/under-length cases → retry once then truncate/decline per policy
+- [x] Fixtures → success; over/under-length cases → retry once then truncate/decline per policy
 **Commit**: `feat(langchain): LC1 exec-summary chain with structured parser`
 
-#### LC2 — Number/Date Audit Runnable (pure) 
+05, 2025) normalized and pass
+  - [ ] Smart quotes vs straight quotes don't affect audit
+- [ ] **Performance**: Fast execution (no NLP heuristics, pure regex + numeric comparison)
+#### LC2 — Number/Date Audit Runnable (pure) ✅
 **Goal**: Wrap LC1 output with an audit that extracts numbers/dates and ensures they are a subset of `audit_index`.
 
 **Acceptance Criteria (Go/No-Go)**:
-- [ ] **Extraction Rules (Deterministic)**:
-  - [ ] Percentages: `r'[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s?%'`
-  - [ ] Dates: `r'(January|February|...|December)\s+\d{1,2},\s+\d{4}'` (strict Month D, YYYY)
-  - [ ] Numbers: Only audit percentages and dates (no plain decimals unless explicitly allowed)
-- [ ] **Normalization for Compare**:
-  - [ ] Percent tokens → float: strip %, remove thousands separators, parse to float
-  - [ ] Tolerance: ±0.05 percentage points (abs(model−source) ≤ 0.0005)
-  - [ ] Dates: parse with dateutil to YYYY-MM-DD and check set membership
-- [ ] **audit_index Enhancement**:
-  - [ ] `numeric_percents`: raw floats (e.g., 0.285, -0.185, 0.37)
-  - [ ] `dates_iso`: YYYY-MM-DD format for comparison
-- [ ] **Algorithm**: extract → normalize → compare
-  - [ ] If all tokens ∈ allowed sets (within tolerance) → pass
-  - [ ] Else: retry once (same skeleton, same prompts)
-  - [ ] If still failing → fallback to skeleton and log WARN with offending tokens
-- [ ] **Edge Cases Tested**:
-  - [ ] Negative percent -18.5% survives; -0.0% normalized to 0.0%
-  - [ ] Multiple identical numbers in text are ok
-  - [ ] Dates with leading zeros (August 05, 2025) normalized and pass
-  - [ ] Smart quotes vs straight quotes don't affect audit
-- [ ] **Performance**: Fast execution (no NLP heuristics, pure regex + numeric comparison)
-
+- [x] **Extraction Rules (Deterministic)**:
+  - [x] Percentages: `r'[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s?%'`
+  - [x] Dates: `r'(January|February|...|December)\s+\d{1,2},\s+\d{4}'` (strict Month D, YYYY)
+  - [x] Numbers: Only audit percentages and dates (no plain decimals unless explicitly allowed)
+- [x] **Normalization for Compare**:
+  - [x] Percent tokens → float: strip %, remove thousands separators, parse to float
+  - [x] Tolerance: ±0.05 percentage points (abs(model−source) ≤ 0.0005)
+  - [x] Dates: parse with dateutil to YYYY-MM-DD and check set membership
+- [x] **audit_index Enhancement**:
+  - [x] `numeric_percents`: raw floats (e.g., 0.285, -0.185, 0.37)
+  - [x] `dates_iso`: YYYY-MM-DD format for comparison
+- [x] **Algorithm**: extract → normalize → compare
+  - [x] If all tokens ∈ allowed sets (within tolerance) → pass
+  - [x] Else: retry once (same skeleton, same prompts)
+  - [x] If still failing → fallback to skeleton and log WARN with offending tokens
+- [x] **Edge Cases Tested**:
+  - [x] Negative percent -18.5% survives; -0.0% normalized to 0.0%
+  - [x] Multiple identical numbers in text are ok
+  - [x] Dates with leading zeros (August 05, 2025) normalized and pass
+  - [x] Smart quotes vs straight quotes don't affect audit
+- [x] **Performance**: Fast execution (no NLP heuristics, pure regex + numeric comparison)
 **Tests**: Positive/negative cases; tolerance edges; all edge cases above
 **Commit**: `feat(langchain): LC2 numeric/date audit + fallback`
 
-#### LC3 — Risks Bullets Chain (LCEL)
+#### LC3 — Risks Bullets Chain (LCEL) ✅
 **Goal**: Chain that outputs **3–5 bullets**; parser enforces list-of-strings with length bounds; audit numbers/dates like LC2.
 **Acceptance**:
-- [ ] Exactly 3–5 bullets; no new numbers/dates
-- [ ] `docs/THOUGHTLOG.md` update: design choices
+- [x] Exactly 3–5 bullets; no new numbers/dates
+- [x] `docs/THOUGHTLOG.md` update: design choices
 **Tests**:
-- [ ] Fixtures hit min/max; bad-format retry then fallback
+- [x] Fixtures hit min/max; bad-format retry then fallback
 **Commit**: `feat(langchain): LC3 risks bullets chain with parser & audit`
 
-#### LC4 — CLI Glue & Switch
+#### LC4 — CLI Glue & Switch ✅
 **Goal**: `report TICKER --llm=on|off` gates calling LC1/LC3; default off.
 **Acceptance**:
-- [ ] When `--llm=off`: deterministic tables only
-- [ ] When `--llm=on`: invokes chains; on audit failure → skeleton fallback
-- [ ] Update `docs/DECISIONS/ADR-00XX.md` ("LangChain limited to polish-only")
+- [x] When `--llm=off`: deterministic tables only
+- [x] When `--llm=on`: invokes chains; on audit failure → skeleton fallback
+- [x] Update `docs/DECISIONS/ADR-0004.md` ("LangChain limited to polish-only")
 **Tests**:
-- [ ] CLI e2e with fixtures; exit codes; idempotent output
+- [x] CLI e2e with fixtures; exit codes; idempotent output
 **Commit**: `feat(langchain): LC4 CLI switch + e2e tests`
 
 ### Phase SNT: Sentiment Analysis (After LangChain)
