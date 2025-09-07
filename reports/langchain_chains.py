@@ -4,6 +4,8 @@ Executive summary and risk bullets with structured parsers.
 """
 
 import re
+import hashlib
+import logging
 from typing import Dict, Any, List, Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import BaseOutputParser
@@ -12,6 +14,9 @@ from langchain_ollama import OllamaLLM
 
 from reports.langchain_setup import ensure_langchain_ready
 from reports.skeleton_builder import build_exec_summary_skeleton
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 
 class ExecSummaryParser(BaseOutputParser[str]):
@@ -25,11 +30,12 @@ class ExecSummaryParser(BaseOutputParser[str]):
         # Clean up the text
         cleaned = text.strip()
         
-        # Remove any quotes if LLM wrapped the response
-        if cleaned.startswith('"') and cleaned.endswith('"'):
-            cleaned = cleaned[1:-1]
-        if cleaned.startswith("'") and cleaned.endswith("'"):
-            cleaned = cleaned[1:-1]
+        # Remove ONLY outermost enclosing quotes (preserve internal quotes, hyphens, %, parentheses)
+        if len(cleaned) >= 2:
+            if cleaned.startswith('"') and cleaned.endswith('"'):
+                cleaned = cleaned[1:-1].strip()
+            elif cleaned.startswith("'") and cleaned.endswith("'"):
+                cleaned = cleaned[1:-1].strip()
         
         # Count words
         words = cleaned.split()
@@ -47,7 +53,9 @@ class ExecSummaryParser(BaseOutputParser[str]):
         return cleaned
     
     def _truncate_at_sentence(self, text: str, max_words: int) -> str:
-        """Truncate text at sentence boundary near max_words."""
+        """Truncate text at sentence boundary near max_words using regex."""
+        import re
+        
         words = text.split()
         if len(words) <= max_words:
             return text
@@ -56,10 +64,11 @@ class ExecSummaryParser(BaseOutputParser[str]):
         truncated_words = words[:max_words]
         truncated_text = ' '.join(truncated_words)
         
-        # Find last sentence boundary
-        last_period = truncated_text.rfind('.')
-        if last_period > 0:
-            return truncated_text[:last_period + 1]
+        # Find last sentence boundary using regex (.?!)
+        sentence_endings = list(re.finditer(r'[.?!]', truncated_text))
+        if sentence_endings:
+            last_sentence_end = sentence_endings[-1].end()
+            return truncated_text[:last_sentence_end].strip()
         else:
             # No sentence boundary found, hard truncate with ellipsis
             return ' '.join(words[:max_words-1]) + '...'
@@ -136,10 +145,18 @@ def create_exec_summary_chain(
     # Ensure LangChain is ready
     ensure_langchain_ready()
     
-    # Create LLM
+    # Create LLM with deterministic parameters
+    llm_options = {
+        'temperature': 0.0,
+        'top_p': 1.0, 
+        'repeat_penalty': 1.0,
+        'num_predict': 512  # Enough for 180 words + overhead
+    }
+    
     llm = OllamaLLM(
         model=model_name or "llama3.1:8b",
-        base_url=base_url or "http://localhost:11434"
+        base_url=base_url or "http://localhost:11434",
+        **llm_options
     )
     
     # Create prompt template
@@ -192,10 +209,18 @@ def create_risk_bullets_chain(
     # Ensure LangChain is ready
     ensure_langchain_ready()
     
-    # Create LLM
+    # Create LLM with deterministic parameters
+    llm_options = {
+        'temperature': 0.0,
+        'top_p': 1.0, 
+        'repeat_penalty': 1.0,
+        'num_predict': 256  # Enough for 5 bullets
+    }
+    
     llm = OllamaLLM(
         model=model_name or "llama3.1:8b",
-        base_url=base_url or "http://localhost:11434"
+        base_url=base_url or "http://localhost:11434",
+        **llm_options
     )
     
     # Create prompt template
@@ -229,7 +254,7 @@ Focus on risks that can be inferred from the actual data provided. Do not invent
 
 def generate_exec_summary(
     metrics_v2: Dict[str, Any],
-    max_retries: int = 2,
+    max_retries: int = 1,  # Max 1 retry, then fallback
     **chain_kwargs
 ) -> str:
     """
@@ -252,6 +277,11 @@ def generate_exec_summary(
     # Create chain
     chain = create_exec_summary_chain(**chain_kwargs)
     
+    # Log generation attempt
+    model_name = chain_kwargs.get("model_name", "llama3.1:8b")
+    prompt_hash = hashlib.md5(skeleton.encode()).hexdigest()[:8]
+    logger.info(f"Generating exec summary: model={model_name}, prompt_hash={prompt_hash}, skeleton_words={len(skeleton.split())}")
+    
     # Attempt generation with retries
     last_error = None
     for attempt in range(max_retries + 1):
@@ -261,20 +291,23 @@ def generate_exec_summary(
                 "min_words": chain_kwargs.get("min_words", 120),
                 "max_words": chain_kwargs.get("max_words", 180)
             })
+            logger.info(f"Exec summary generated successfully: attempt={attempt+1}, output_words={len(result.split())}")
             return result
         except Exception as e:
             last_error = e
+            logger.warning(f"Exec summary attempt {attempt+1} failed: {e}")
             if attempt < max_retries:
                 continue
             break
     
     # If all retries failed, return skeleton as fallback
+    logger.warning(f"Exec summary fallback to skeleton: final_error={last_error}")
     return skeleton
 
 
 def generate_risk_bullets(
     metrics_v2: Dict[str, Any],
-    max_retries: int = 2,
+    max_retries: int = 1,  # Max 1 retry, then fallback
     **chain_kwargs
 ) -> List[str]:
     """
@@ -298,6 +331,11 @@ def generate_risk_bullets(
     import json
     metrics_json = json.dumps(metrics_v2, indent=2)
     
+    # Log generation attempt
+    model_name = chain_kwargs.get("model_name", "llama3.1:8b")
+    prompt_hash = hashlib.md5(metrics_json.encode()).hexdigest()[:8]
+    logger.info(f"Generating risk bullets: model={model_name}, prompt_hash={prompt_hash}")
+    
     # Attempt generation with retries
     last_error = None
     for attempt in range(max_retries + 1):
@@ -307,16 +345,20 @@ def generate_risk_bullets(
                 "min_bullets": chain_kwargs.get("min_bullets", 3),
                 "max_bullets": chain_kwargs.get("max_bullets", 5)
             })
+            logger.info(f"Risk bullets generated successfully: attempt={attempt+1}, bullets_count={len(result)}")
             return result
         except Exception as e:
             last_error = e
+            logger.warning(f"Risk bullets attempt {attempt+1} failed: {e}")
             if attempt < max_retries:
                 continue
             break
     
     # If all retries failed, return fallback bullets
-    return [
+    fallback_bullets = [
         "Market volatility risk based on observed price movements",
         "Concentration risk in institutional ownership structure", 
         "Liquidity risk during market stress periods"
     ]
+    logger.warning(f"Risk bullets fallback to default: final_error={last_error}")
+    return fallback_bullets

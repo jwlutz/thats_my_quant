@@ -205,19 +205,23 @@ class TestCreateExecSummaryChain:
         """Test successful chain creation."""
         mock_ensure.return_value = None
         mock_llm.return_value = MagicMock()
-        
+
         chain = create_exec_summary_chain(
             model_name="test-model",
             base_url="http://test:11434",
             min_words=100,
             max_words=150
         )
-        
+
         assert chain is not None
         mock_ensure.assert_called_once()
         mock_llm.assert_called_once_with(
             model="test-model",
-            base_url="http://test:11434"
+            base_url="http://test:11434",
+            temperature=0.0,
+            top_p=1.0,
+            repeat_penalty=1.0,
+            num_predict=512
         )
     
     @patch('reports.langchain_chains.ensure_langchain_ready')
@@ -240,19 +244,23 @@ class TestCreateRiskBulletsChain:
         """Test successful chain creation."""
         mock_ensure.return_value = None
         mock_llm.return_value = MagicMock()
-        
+
         chain = create_risk_bullets_chain(
             model_name="test-model",
             base_url="http://test:11434",
             min_bullets=4,
             max_bullets=6
         )
-        
+
         assert chain is not None
         mock_ensure.assert_called_once()
         mock_llm.assert_called_once_with(
             model="test-model",
-            base_url="http://test:11434"
+            base_url="http://test:11434",
+            temperature=0.0,
+            top_p=1.0,
+            repeat_penalty=1.0,
+            num_predict=256
         )
 
 
